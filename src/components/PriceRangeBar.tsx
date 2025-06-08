@@ -2,7 +2,14 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { styles } from '../styles/appStyles';
 
-export function PriceRangeBar({ title, min, max, current }) {
+interface PriceRangeBarProps {
+  title: string;
+  min: number;
+  max: number;
+  current: number;
+}
+
+export function PriceRangeBar({ title, min, max, current }: PriceRangeBarProps): React.JSX.Element {
   const percentage = ((current - min) / (max - min)) * 100;
 
   return (

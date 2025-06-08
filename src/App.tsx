@@ -10,6 +10,8 @@ import {
   StatusBar,
   ScrollView,
   Animated,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import { DEFAULT_TICKERS } from './constants/tickers';
 import { fetchPriceData } from './api/yahooFinance';
@@ -20,27 +22,31 @@ import { DataRow } from './components/DataRow';
 import { DetailsPage } from './components/DetailsPage';
 import { AddSymbolModal } from './components/AddSymbolModal';
 import { styles } from './styles/appStyles';
+import { AssetItem, SortConfig } from './types';
 
-export default function App() {
-  const [data, setData] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [tickers, setTickers] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [showDetailsPage, setShowDetailsPage] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const flatListRef = useRef(null);
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState, AppDispatch } from './store';
+import { fetchAssets, sortAssets } from './store/slices/assetsSlice';
+
+export default function App(): React.JSX.Element {
+  const dispatch = useDispatch<AppDispatch>();
+  const { items: data, status, sortConfig } = useSelector((state: RootState) => state.assets);
+  const [tickers, setTickers] = useState<string[]>([]);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<AssetItem | null>(null);
+  const flatListRef = useRef<FlatList<AssetItem>>(null);
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const fixedScrollRef = useRef(null);
-  const scrollableScrollRef = useRef(null);
-  const horizontalScrollRef = useRef(null);
+  const fixedScrollRef = useRef<FlatList<AssetItem>>(null);
+  const scrollableScrollRef = useRef<FlatList<AssetItem>>(null);
+  const horizontalScrollRef = useRef<ScrollView>(null);
 
   const isScrolling = useRef({ fixed: false, scrollable: false });
 
-  const handleFixedScroll = useCallback((event) => {
+  const handleFixedScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!isScrolling.current.scrollable) {
       isScrolling.current.fixed = true;
       const offsetY = event.nativeEvent.contentOffset.y;
@@ -57,7 +63,7 @@ export default function App() {
     }
   }, [scrollY]);
 
-  const handleScrollableScroll = useCallback((event) => {
+  const handleScrollableScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!isScrolling.current.scrollable) {
       isScrolling.current.scrollable = true;
       const offsetY = event.nativeEvent.contentOffset.y;
@@ -83,90 +89,25 @@ export default function App() {
     setTickers(DEFAULT_TICKERS);
   }, []);
 
-  const loadRSI = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      const result = await Promise.all(
-        tickers.map(async (ticker) => {
-          const {
-            closingPrices,
-            currentPrice,
-            oneDayReturn,
-            oneWeekReturn,
-            oneMonthReturn,
-            threeMonthReturn,
-            sixMonthReturn,
-            allPrices
-          } = await fetchPriceData(ticker);
-
-          const rsiArray = calculateRSI(closingPrices);
-          const rsi = rsiArray.length ? parseFloat(rsiArray[rsiArray.length - 1].toFixed(2)) : 'N/A';
-
-          const formattedOneDayReturn = oneDayReturn !== null
-            ? (oneDayReturn > 0 ? '+' : '') + oneDayReturn.toFixed(2) + '%'
-            : 'N/A';
-          const formattedOneWeekReturn = oneWeekReturn !== null
-            ? (oneWeekReturn > 0 ? '+' : '') + oneWeekReturn.toFixed(2) + '%'
-            : 'N/A';
-          const formattedOneMonthReturn = oneMonthReturn !== null
-            ? (oneMonthReturn > 0 ? '+' : '') + oneMonthReturn.toFixed(2) + '%'
-            : 'N/A';
-
-          return {
-            ticker,
-            rsi,
-            currentPrice: currentPrice !== null ? currentPrice.toFixed(2) : 'N/A',
-            oneDayReturn: formattedOneDayReturn,
-            oneWeekReturn: formattedOneWeekReturn,
-            oneMonthReturn: formattedOneMonthReturn,
-            rawRsi: rsi === 'N/A' ? null : rsi,
-            rawCurrentPrice: currentPrice,
-            rawOneDayReturn: oneDayReturn,
-            rawOneWeekReturn: oneWeekReturn,
-            rawOneMonthReturn: oneMonthReturn,
-            rawThreeMonthReturn: threeMonthReturn,
-            rawSixMonthReturn: sixMonthReturn,
-            allPrices: allPrices
-          };
-        })
-      );
-
-      const sorted = result.sort((a, b) => {
-        if (a.rsi === 'N/A') return 1;
-        if (b.rsi === 'N/A') return -1;
-        return a.rsi - b.rsi;
-      });
-
-      setData(sorted);
-    } catch (error) {
-      console.error('Error loading RSI data:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  }, [tickers]);
-
-  useEffect(() => {
+  const loadRSI = useCallback(() => {
     if (tickers.length > 0) {
-      loadRSI();
+      dispatch(fetchAssets(tickers));
     }
-  }, [tickers, loadRSI]);
+  }, [dispatch, tickers]);
 
   useEffect(() => {
-    if (data.length > 0 && sortConfig.key) {
-      const sorted = sortData(data, sortConfig.key, sortConfig.direction);
-      setData(sorted);
-    }
-  }, [sortConfig]);
+    loadRSI();
+  }, [loadRSI]);
 
-  const handleSort = (key) => {
-    let direction = 'asc';
+  const handleSort = (key: keyof AssetItem) => {
+    let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
-    setSortConfig({ key, direction });
+    dispatch(sortAssets({ key, direction }));
   };
 
-  const handleSymbolPress = (item) => {
+  const handleSymbolPress = (item: AssetItem) => {
     setSelectedItem(item);
     setShowDetailsPage(true);
   };
@@ -176,7 +117,7 @@ export default function App() {
     setSelectedItem(null);
   }, []);
 
-  const addSymbol = (symbol) => {
+  const addSymbol = (symbol: string) => {
     const formattedSymbol = formatSymbol(symbol);
     if (tickers.includes(formattedSymbol)) {
       Alert.alert('Error', 'This symbol is already in your list');
@@ -187,7 +128,7 @@ export default function App() {
     setModalVisible(false);
   };
 
-  const deleteSymbol = (symbolToDelete) => {
+  const deleteSymbol = (symbolToDelete: string) => {
     Alert.alert(
       "Delete Symbol?",
       `Are you sure you want to remove ${symbolToDelete.replace('.NS', '')}?`,
@@ -206,12 +147,12 @@ export default function App() {
     );
   };
 
-  const renderFixedRow = ({ item }) => (
-    <DataRow item={item} onDelete={deleteSymbol} onSymbolPress={handleSymbolPress} fixed />
+  const renderFixedRow = ({ item }: { item: AssetItem }) => (
+    <DataRow item={item} onDelete={deleteSymbol} onSymbolPress={handleSymbolPress} fixed scrollable={false} />
   );
 
-  const renderScrollableRow = ({ item }) => (
-    <DataRow item={item} onDelete={deleteSymbol} onSymbolPress={handleSymbolPress} scrollable />
+  const renderScrollableRow = ({ item }: { item: AssetItem }) => (
+    <DataRow item={item} onDelete={deleteSymbol} onSymbolPress={handleSymbolPress} scrollable fixed={false} />
   );
 
   if (showDetailsPage && selectedItem) {
@@ -247,7 +188,7 @@ export default function App() {
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={loadRSI} />
+              <RefreshControl refreshing={status === 'loading'} onRefresh={loadRSI} />
             }
             bounces={false}
           />

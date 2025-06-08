@@ -1,0 +1,352 @@
+import { StyleSheet } from 'react-native';
+import { colors } from '../theme/colors';
+import { sizes } from '../theme/sizes';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: sizes.base * 2,
+  },
+  header: {
+    fontSize: sizes.h2,
+    fontWeight: 'bold',
+    marginBottom: sizes.base * 2,
+    marginTop: sizes.base * 2,
+    textAlign: 'center',
+    color: colors.text,
+  },
+  addButton: {
+    backgroundColor: colors.primary,
+    padding: sizes.base * 1.5,
+    borderRadius: sizes.radius,
+    marginBottom: sizes.base * 2,
+    alignItems: 'center',
+    marginHorizontal: sizes.base,
+  },
+  addButtonText: {
+    color: colors.text,
+    fontWeight: 'bold',
+    fontSize: sizes.h3,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: 2,
+    borderBottomColor: colors.border,
+    paddingBottom: sizes.base,
+    marginBottom: sizes.base,
+    backgroundColor: colors.background,
+  },
+  fixedHeaderColumn: {
+    width: 100,
+    justifyContent: 'center',
+    paddingHorizontal: sizes.base,
+  },
+  scrollableHeaders: {
+    flexDirection: 'row',
+    marginLeft: 30,
+  },
+  headerRow: {
+    flexDirection: 'row',
+  },
+  headerButton: {
+    width: 70,
+    paddingHorizontal: sizes.base,
+    paddingVertical: sizes.base,
+  },
+  headerCell: {
+    fontWeight: 'bold',
+    fontSize: sizes.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingVertical: sizes.base * 1.75,
+    minHeight: 60,
+    alignItems: 'center',
+  },
+  row1: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingVertical: sizes.base * 1.75,
+    minHeight: 60,
+    alignItems: 'center',
+  },
+  fixedColumn: {
+    justifyContent: 'center',
+    paddingHorizontal: sizes.base,
+  },
+  tickerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  scrollableColumns: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  dataRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 32,
+  },
+  ticker: {
+    fontSize: sizes.body,
+    color: colors.text,
+    fontWeight: '600',
+  },
+  clickableTicker: {
+    textDecorationLine: 'underline',
+  },
+  dataCell: {
+    fontSize: sizes.body,
+    fontWeight: 'bold',
+    textAlign: 'right',
+    width: 70,
+    color: colors.text,
+  },
+  priceCell: {
+    color: colors.text,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: sizes.base * 2.5,
+    fontSize: sizes.h3,
+    color: colors.textMuted,
+  },
+  flatListContent: {
+    paddingBottom: sizes.base * 2.5,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+  },
+  modalView: {
+    width: sizes.width * 0.85,
+    backgroundColor: colors.surface,
+    borderRadius: sizes.radius,
+    padding: sizes.padding,
+    borderWidth: 1,
+    borderColor: '#444',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: sizes.h2,
+    fontWeight: 'bold',
+    marginBottom: sizes.base * 2.5,
+    textAlign: 'center',
+    color: colors.text,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#444',
+    backgroundColor: '#2C2C2C',
+    color: colors.text,
+    borderRadius: sizes.radius,
+    padding: sizes.base * 1.5,
+    marginBottom: sizes.base,
+    fontSize: sizes.h3,
+  },
+  inputHelp: {
+    fontSize: sizes.caption,
+    color: colors.textMuted,
+    marginBottom: sizes.base * 2.5,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    padding: sizes.base * 1.5,
+    borderRadius: sizes.radius,
+    alignItems: 'center',
+    marginHorizontal: sizes.base,
+  },
+  buttonCancel: {
+    backgroundColor: '#2E2E2E',
+    borderWidth: 1,
+    borderColor: '#555',
+  },
+  buttonAdd: {
+    backgroundColor: colors.primary,
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    color: colors.text,
+    fontSize: sizes.h3,
+  },
+  buttonAddText: {
+    color: colors.text,
+  },
+  // Details Page Styles
+  detailsPage: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: sizes.padding,
+    paddingVertical: sizes.base * 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  backButton: {
+    padding: sizes.base,
+    borderRadius: sizes.radius,
+    backgroundColor: colors.border,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: colors.text,
+    fontSize: sizes.h3,
+    fontWeight: '600',
+  },
+  detailsTitle: {
+    fontSize: sizes.title,
+    fontWeight: 'bold',
+    color: colors.text,
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: sizes.base,
+  },
+  spacer: {
+    width: 80,
+  },
+  detailsContent: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  detailsContentContainer: {
+    padding: sizes.padding,
+    paddingBottom: sizes.padding * 2,
+  },
+  detailsSection: {
+    marginBottom: sizes.padding,
+    backgroundColor: colors.surface,
+    padding: sizes.padding,
+    borderRadius: sizes.radius,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  sectionTitle: {
+    fontSize: sizes.h3,
+    fontWeight: 'bold',
+    color: colors.textSecondary,
+    marginBottom: sizes.base * 1.5,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  priceValue: {
+    fontSize: sizes.h1,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  rsiValue: {
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  rsiDescription: {
+    fontSize: sizes.body,
+    color: colors.textMuted,
+    marginTop: sizes.base,
+    fontStyle: 'italic',
+  },
+  returnRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: sizes.base * 1.5,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  returnLabel: {
+    fontSize: sizes.h3,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
+  returnValue: {
+    fontSize: sizes.h3,
+    fontWeight: 'bold',
+  },
+  volatilityValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.warning,
+  },
+  symbolValue: {
+    fontSize: sizes.h3,
+    color: colors.text,
+    fontFamily: 'monospace',
+    backgroundColor: '#2C2C2C',
+    padding: sizes.base * 1.25,
+    borderRadius: sizes.radius,
+  },
+  // Price Range Bar Styles
+  priceRangeContainer: {
+    marginBottom: sizes.base * 2.5,
+  },
+  priceRangeTitle: {
+    fontSize: sizes.body,
+    fontWeight: 'bold',
+    color: colors.textSecondary,
+    marginBottom: sizes.base,
+  },
+  priceRangeBar: {
+    height: sizes.base,
+    backgroundColor: '#444',
+    borderRadius: sizes.radius,
+    justifyContent: 'center',
+  },
+  priceRangeFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: sizes.radius,
+  },
+  priceRangeIndicator: {
+    position: 'absolute',
+    width: sizes.base * 2,
+    height: sizes.base * 2,
+    borderRadius: sizes.base,
+    backgroundColor: colors.text,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    transform: [{ translateX: -sizes.base }],
+  },
+  priceRangeLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: sizes.base / 2,
+  },
+  priceRangeLabel: {
+    fontSize: sizes.caption,
+    color: colors.textMuted,
+  },
+  priceRangeCurrent: {
+    fontSize: sizes.caption,
+    color: colors.text,
+    textAlign: 'center',
+    marginTop: sizes.base / 2,
+    fontWeight: 'bold',
+  },
+});

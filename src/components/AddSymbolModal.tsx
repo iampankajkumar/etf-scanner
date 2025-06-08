@@ -2,7 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
 import { styles } from '../styles/appStyles';
 
-export function AddSymbolModal({ visible, onClose, onAdd }) {
+interface AddSymbolModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (symbol: string) => void;
+}
+
+export function AddSymbolModal({ visible, onClose, onAdd }: AddSymbolModalProps): React.JSX.Element {
   const [newSymbol, setNewSymbol] = useState('');
 
   const handleAdd = () => {

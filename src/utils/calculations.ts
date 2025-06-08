@@ -1,7 +1,7 @@
-export function calculateRSI(closes, period = 14) {
+export function calculateRSI(closes: number[], period = 14): number[] {
   if (closes.length < period + 1) return [];
 
-  const changes = [];
+  const changes: number[] = [];
   for (let i = 1; i < closes.length; i++) {
     changes.push(closes[i] - closes[i - 1]);
   }
@@ -21,7 +21,7 @@ export function calculateRSI(closes, period = 14) {
   let avgGain = sumGain / period;
   let avgLoss = sumLoss / period;
 
-  const rsis = [];
+  const rsis: number[] = [];
   let rs = avgGain / (avgLoss === 0 ? 0.001 : avgLoss);
   rsis.push(100 - (100 / (1 + rs)));
 
@@ -40,10 +40,10 @@ export function calculateRSI(closes, period = 14) {
   return rsis;
 }
 
-export function calculateVolatility(prices) {
+export function calculateVolatility(prices: number[]): string {
   if (prices.length < 2) return 'N/A';
   
-  const returns = [];
+  const returns: number[] = [];
   for (let i = 1; i < prices.length; i++) {
     returns.push((prices[i] - prices[i - 1]) / prices[i - 1]);
   }

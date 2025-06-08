@@ -2,8 +2,18 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '../styles/appStyles';
 import { getColor, getReturnColor } from '../utils/ui';
+import { formatReturn } from '../utils/data';
+import { AssetItem } from '../types';
 
-export function DataRow({ item, onDelete, onSymbolPress, fixed, scrollable }) {
+interface DataRowProps {
+  item: AssetItem;
+  onDelete: (symbol: string) => void;
+  onSymbolPress: (item: AssetItem) => void;
+  fixed: boolean;
+  scrollable: boolean;
+}
+
+export function DataRow({ item, onDelete, onSymbolPress, fixed, scrollable }: DataRowProps): React.JSX.Element | null {
   if (fixed) {
     return (
       <View style={styles.row1}>
@@ -40,6 +50,12 @@ export function DataRow({ item, onDelete, onSymbolPress, fixed, scrollable }) {
           </Text>
           <Text style={[styles.dataCell, { color: getReturnColor(item.oneMonthReturn) }]}>
             {item.oneMonthReturn}
+          </Text>
+          <Text style={[styles.dataCell, { color: getReturnColor(formatReturn(item.rawThreeMonthReturn)) }]}>
+            {formatReturn(item.rawThreeMonthReturn)}
+          </Text>
+          <Text style={[styles.dataCell, { color: getReturnColor(formatReturn(item.rawSixMonthReturn)) }]}>
+            {formatReturn(item.rawSixMonthReturn)}
           </Text>
         </View>
       </View>

@@ -12,8 +12,14 @@ import { styles } from '../styles/appStyles';
 import { calculateVolatility } from '../utils/calculations';
 import { getColor } from '../utils/ui';
 import { PriceRangeBar } from './PriceRangeBar';
+import { AssetItem } from '../types';
 
-export function DetailsPage({ item, onBack }) {
+interface DetailsPageProps {
+  item: AssetItem | null;
+  onBack: () => void;
+}
+
+export function DetailsPage({ item, onBack }: DetailsPageProps): React.JSX.Element | null {
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       onBack();
@@ -24,17 +30,17 @@ export function DetailsPage({ item, onBack }) {
 
   if (!item) return null;
 
-  const formatReturn = (value) => {
+  const formatReturn = (value: number | null | undefined) => {
     if (value === null || value === undefined) return 'N/A';
     return (value > 0 ? '+' : '') + value.toFixed(2) + '%';
   };
 
-  const getDetailColor = (value) => {
+  const getDetailColor = (value: number | null | undefined) => {
     if (value === null || value === undefined) return '#888';
     return value > 0 ? '#4CAF50' : value < 0 ? '#FF5252' : '#888';
   };
 
-  const getPriceRange = (prices, days) => {
+  const getPriceRange = (prices: { date: string; price: number }[], days: number) => {
     if (!prices || prices.length === 0) return { min: 0, max: 0 };
     const now = new Date();
     const pastDate = new Date(now);
@@ -50,7 +56,7 @@ export function DetailsPage({ item, onBack }) {
     };
   };
 
-  const volatility = calculateVolatility(item.allPrices || []);
+  const volatility = calculateVolatility(item.allPrices ? item.allPrices.map(p => p.price) : []);
   const weeklyRange = getPriceRange(item.allPrices, 7);
   const monthlyRange = getPriceRange(item.allPrices, 30);
   const yearlyRange = getPriceRange(item.allPrices, 365);
@@ -80,13 +86,13 @@ export function DetailsPage({ item, onBack }) {
 
         <View style={styles.detailsSection}>
           <Text style={styles.sectionTitle}>Price Ranges</Text>
-          {weeklyRange.max > 0 && (
+          {weeklyRange.max > 0 && item.rawCurrentPrice && (
             <PriceRangeBar title="Weekly Range" min={weeklyRange.min} max={weeklyRange.max} current={item.rawCurrentPrice} />
           )}
-          {monthlyRange.max > 0 && (
+          {monthlyRange.max > 0 && item.rawCurrentPrice && (
             <PriceRangeBar title="Monthly Range" min={monthlyRange.min} max={monthlyRange.max} current={item.rawCurrentPrice} />
           )}
-          {yearlyRange.max > 0 && (
+          {yearlyRange.max > 0 && item.rawCurrentPrice && (
             <PriceRangeBar title="Yearly Range" min={yearlyRange.min} max={yearlyRange.max} current={item.rawCurrentPrice} />
           )}
         </View>
@@ -98,8 +104,8 @@ export function DetailsPage({ item, onBack }) {
           </Text>
           <Text style={styles.rsiDescription}>
             {item.rsi !== 'N/A' && (
-              parseFloat(item.rsi) < 30 ? 'Oversold' :
-              parseFloat(item.rsi) > 70 ? 'Overbought' : 'Neutral'
+              (item.rsi < 30) ? 'Oversold' :
+              (item.rsi > 70) ? 'Overbought' : 'Neutral'
             )}
           </Text>
         </View>

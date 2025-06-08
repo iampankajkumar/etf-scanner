@@ -1,12 +1,11 @@
-import { useRef, useCallback } from 'react';
-import { findNodeHandle } from 'react-native';
+import { useRef, useCallback, RefObject } from 'react';
+import { NativeSyntheticEvent, NativeScrollEvent, ScrollView } from 'react-native';
 
-export function useScrollSync(refs) {
+export function useScrollSync(refs: RefObject<ScrollView>[]) {
   const isSyncing = useRef(false);
-  const nodeHandles = useRef([]);
 
   const onScroll = useCallback(
-    (event) => {
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       if (isSyncing.current) {
         isSyncing.current = false; // Reset and ignore this event
         return;
