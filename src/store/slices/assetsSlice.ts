@@ -4,6 +4,9 @@ import { getAssetData } from '../../services/assetService';
 import { sortData } from '../../utils/data';
 import { DEFAULT_TICKERS } from '../../constants/tickers';
 
+/**
+ * State interface for the assets slice
+ */
 interface AssetsState {
   items: AssetItem[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -12,6 +15,9 @@ interface AssetsState {
   tickers: string[];
 }
 
+/**
+ * Initial state for the assets slice
+ */
 const initialState: AssetsState = {
   items: [],
   status: 'idle',
@@ -20,19 +26,73 @@ const initialState: AssetsState = {
   tickers: DEFAULT_TICKERS,
 };
 
-export const fetchAssets = createAsyncThunk('assets/fetchAssets', async (_, { getState }) => {
-  const { assets } = getState() as { assets: AssetsState };
-  const { tickers } = assets;
-  const result = await Promise.all(
-    tickers.map(ticker => getAssetData(ticker))
-  );
-  return result;
+/**
+ * Create an empty asset item for error cases
+ * @param symbol The symbol to use for the empty item
+ * @returns An empty asset item
+ */
+const createEmptyAssetItem = (symbol: string): AssetItem => ({
+  ticker: symbol,
+  rsi: 'N/A',
+  currentPrice: 'N/A',
+  oneDayReturn: 'N/A',
+  oneWeekReturn: 'N/A',
+  oneMonthReturn: 'N/A',
+  discount: 'N/A',
+  fiftyTwoWeekHigh: null,
+  rawRsi: null,
+  rawCurrentPrice: null,
+  rawOneDayReturn: null,
+  rawOneWeekReturn: null,
+  rawOneMonthReturn: null,
+  rawThreeMonthReturn: null,
+  rawSixMonthReturn: null,
+  allPrices: [],
 });
 
+/**
+ * Async thunk for fetching assets data
+ */
+export const fetchAssets = createAsyncThunk(
+  'assets/fetchAssets',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { assets: AssetsState };
+      const { tickers } = state.assets;
+      
+      if (!tickers.length) {
+        return [] as AssetItem[];
+      }
+      
+      const result = await Promise.all(
+        tickers.map(async (ticker) => {
+          try {
+            return await getAssetData(ticker);
+          } catch (error) {
+            console.error(`Error fetching data for ${ticker}:`, error);
+            // Return a placeholder for failed items rather than failing the whole request
+            return createEmptyAssetItem(ticker);
+          }
+        })
+      );
+      
+      return result;
+    } catch (error) {
+      return rejectWithValue((error as Error).message || 'Failed to fetch assets');
+    }
+  }
+);
+
+/**
+ * Assets slice definition
+ */
 const assetsSlice = createSlice({
   name: 'assets',
   initialState,
   reducers: {
+    /**
+     * Sort assets based on a key and direction
+     */
     sortAssets: (state, action: PayloadAction<SortConfig>) => {
       state.sortConfig = action.payload;
       const { key, direction } = state.sortConfig;
@@ -40,23 +100,45 @@ const assetsSlice = createSlice({
         state.items = sortData([...state.items], key, direction);
       }
     },
+    
+    /**
+     * Add a ticker to the list if it doesn't already exist
+     */
     addTicker: (state, action: PayloadAction<string>) => {
-      if (!state.tickers.includes(action.payload)) {
-        state.tickers.push(action.payload);
+      const ticker = action.payload.trim();
+      if (ticker && !state.tickers.includes(ticker)) {
+        state.tickers.push(ticker);
       }
     },
+    
+    /**
+     * Remove a ticker from the list
+     */
     removeTicker: (state, action: PayloadAction<string>) => {
       state.tickers = state.tickers.filter((ticker) => ticker !== action.payload);
+      // Also remove the item from the items array
+      state.items = state.items.filter((item) => item.ticker !== action.payload);
+    },
+    
+    /**
+     * Clear any error state
+     */
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAssets.pending, (state) => {
         state.status = 'loading';
+        state.error = null;
       })
       .addCase(fetchAssets.fulfilled, (state, action: PayloadAction<AssetItem[]>) => {
         state.status = 'succeeded';
         state.items = action.payload;
+        state.error = null;
+        
+        // Apply current sort configuration
         const { key, direction } = state.sortConfig;
         if (key) {
           state.items = sortData([...state.items], key, direction);
@@ -64,10 +146,10 @@ const assetsSlice = createSlice({
       })
       .addCase(fetchAssets.rejected, (state, action) => {
         state.status = 'failed';
-        state.error = action.error.message || null;
+        state.error = action.payload as string || action.error.message || 'Unknown error';
       });
   },
 });
 
-export const { sortAssets, addTicker, removeTicker } = assetsSlice.actions;
+export const { sortAssets, addTicker, removeTicker, clearError } = assetsSlice.actions;
 export default assetsSlice.reducer;

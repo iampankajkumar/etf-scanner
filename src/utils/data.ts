@@ -30,6 +30,17 @@ export function sortData(dataToSort: AssetItem[], key: keyof AssetItem | null, d
         aVal = a.ticker;
         bVal = b.ticker;
         break;
+      case 'discount':
+        // Parse discount percentage strings to numbers for proper sorting
+        // but don't modify the original values
+        if (a.discount && a.discount !== 'N/A' && b.discount && b.discount !== 'N/A') {
+          aVal = parseFloat(a.discount.replace('%', ''));
+          bVal = parseFloat(b.discount.replace('%', ''));
+        } else {
+          aVal = a.discount;
+          bVal = b.discount;
+        }
+        break;
       case 'currentPrice':
         aVal = a.rawCurrentPrice;
         bVal = b.rawCurrentPrice;

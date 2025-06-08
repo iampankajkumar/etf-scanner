@@ -20,16 +20,77 @@ export const styles = StyleSheet.create({
   },
   headerContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderBottomWidth: 2,
     borderBottomColor: colors.border,
     paddingBottom: sizes.base,
     marginBottom: sizes.base,
     backgroundColor: colors.background,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerIcon: {
+    width: 30,
+    height: 30,
+    marginRight: 10,
+  },
+  headerTitle: {
+    fontSize: sizes.h2,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  addButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButtonText: {
+    fontSize: sizes.h2,
+    color: colors.text,
+    fontWeight: 'bold',
+  },
+  errorContainer: {
+    backgroundColor: colors.error,
+    padding: sizes.base,
+    marginBottom: sizes.base,
+    borderRadius: sizes.radius,
+  },
+  errorText: {
+    color: colors.text,
+    fontSize: sizes.body,
+    textAlign: 'center',
+  },
+  contentContainer: {
+    flex: 1,
+  },
   fixedHeaderColumn: {
-    width: 120,
+    width: 100,
     justifyContent: 'center',
     paddingHorizontal: sizes.base / 2,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: sizes.padding,
+  },
+  loadingText: {
+    marginTop: sizes.base,
+    fontSize: sizes.body,
+    color: colors.textSecondary,
+  },
+  tableContainer: {
+    flexDirection: 'row',
+    flex: 1,
+  },
+  scrollableColumnsContainer: {
+    flex: 15,
   },
   scrollableHeaders: {
     flexDirection: 'row',
@@ -43,7 +104,7 @@ export const styles = StyleSheet.create({
     fontSize: sizes.body,
     color: colors.textSecondary,
     textAlign: 'center',
-    width: 90,
+    width: 80,
     paddingHorizontal: sizes.base,
     paddingVertical: sizes.base,
   },
@@ -94,7 +155,7 @@ export const styles = StyleSheet.create({
     fontSize: sizes.body,
     fontWeight: 'bold',
     textAlign: 'right',
-    width: 90,
+    width: 80,
     color: colors.text,
   },
   priceCell: {
@@ -105,6 +166,24 @@ export const styles = StyleSheet.create({
     marginTop: sizes.base * 2.5,
     fontSize: sizes.h3,
     color: colors.textMuted,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: sizes.padding,
+  },
+  emptyButton: {
+    marginTop: sizes.base * 2,
+    paddingVertical: sizes.base,
+    paddingHorizontal: sizes.base * 2,
+    backgroundColor: colors.primary,
+    borderRadius: sizes.radius,
+  },
+  emptyButtonText: {
+    color: colors.text,
+    fontSize: sizes.body,
+    fontWeight: 'bold',
   },
   flatListContent: {
     paddingBottom: sizes.base * 2.5,
@@ -247,5 +326,73 @@ export const styles = StyleSheet.create({
   priceRangeLabel: {
     fontSize: sizes.caption,
     color: colors.textMuted,
+  },
+  
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  modalView: {
+    width: '80%',
+    backgroundColor: colors.surface,
+    borderRadius: sizes.radius,
+    padding: sizes.padding,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: sizes.h2,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginBottom: sizes.base * 2,
+    textAlign: 'center',
+  },
+  input: {
+    backgroundColor: colors.background,
+    color: colors.text,
+    padding: sizes.base,
+    borderRadius: sizes.radius,
+    borderWidth: 1,
+    borderColor: colors.border,
+    fontSize: sizes.body,
+    marginBottom: sizes.base,
+  },
+  inputHelp: {
+    fontSize: sizes.caption,
+    color: colors.textMuted,
+    marginBottom: sizes.base * 2,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    padding: sizes.base,
+    borderRadius: sizes.radius,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  buttonCancel: {
+    backgroundColor: colors.border,
+  },
+  buttonAdd: {
+    backgroundColor: colors.primary,
+  },
+  buttonText: {
+    fontSize: sizes.body,
+    fontWeight: 'bold',
+    color: colors.text,
+  },
+  buttonAddText: {
+    color: colors.text,
   },
 });

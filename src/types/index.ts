@@ -5,6 +5,8 @@ export interface AssetItem {
   oneDayReturn: string;
   oneWeekReturn: string;
   oneMonthReturn: string;
+  discount: string;
+  fiftyTwoWeekHigh: number | null;
   rawRsi: number | null;
   rawCurrentPrice: number | null;
   rawOneDayReturn: number | null;

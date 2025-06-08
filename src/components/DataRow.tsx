@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '../styles/appStyles';
-import { getColor, getReturnColor } from '../utils/ui';
+import { getColor, getReturnColor, getDiscountColor } from '../utils/ui';
 import { formatReturn } from '../utils/data';
 import { AssetItem } from '../types';
 
@@ -24,7 +24,7 @@ export function DataRow({ item, onDelete, onSymbolPress, fixed, scrollable }: Da
             style={styles.tickerContainer}
           >
             <Text style={[styles.ticker, styles.clickableTicker]}>
-              {item.ticker.replace('.NS', '')}
+              {item.ticker ? item.ticker.replace('.NS', '') : ''}
             </Text>
           </TouchableOpacity>
         </View>
@@ -36,6 +36,9 @@ export function DataRow({ item, onDelete, onSymbolPress, fixed, scrollable }: Da
     return (
       <View style={styles.row}>
         <View style={styles.scrollableColumns}>
+          <Text style={[styles.dataCell, { color: getDiscountColor(item.discount) }]}>
+            {item.discount || '0.00%'}
+          </Text>
           <Text style={[styles.dataCell, styles.priceCell]}>
             {item.currentPrice}
           </Text>

@@ -1,27 +1,105 @@
-import { useRef, useCallback, RefObject } from 'react';
-import { NativeSyntheticEvent, NativeScrollEvent, ScrollView } from 'react-native';
+import { useRef, useCallback } from 'react';
+import { 
+  Animated, 
+  NativeSyntheticEvent, 
+  NativeScrollEvent, 
+  FlatList,
+  ScrollView
+} from 'react-native';
 
-export function useScrollSync(refs: RefObject<ScrollView>[]) {
-  const isSyncing = useRef(false);
-
-  const onScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (isSyncing.current) {
-        isSyncing.current = false; // Reset and ignore this event
-        return;
-      }
-
-      isSyncing.current = true;
-      const { x } = event.nativeEvent.contentOffset;
-
-      for (const ref of refs) {
-        if (ref.current) {
-          ref.current.scrollTo({ x, animated: false });
-        }
-      }
-    },
-    [refs]
-  );
-
-  return { onScroll };
+/**
+ * Props for the useScrollSync hook
+ */
+interface UseScrollSyncProps {
+  /**
+   * Whether to enable horizontal scrolling
+   */
+  enableHorizontalScroll?: boolean;
 }
+
+/**
+ * Custom hook for synchronizing scroll between two lists
+ * @param props Hook configuration
+ * @returns Object containing refs and handlers for scroll synchronization
+ */
+export const useScrollSync = <T,>(props?: UseScrollSyncProps) => {
+  const { enableHorizontalScroll = true } = props || {};
+  
+  // Animation values for tracking scroll position
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const scrollX = useRef(new Animated.Value(0)).current;
+  
+  // Refs for the lists
+  const fixedListRef = useRef<FlatList<T>>(null);
+  const scrollableListRef = useRef<FlatList<T>>(null);
+  const horizontalScrollRef = useRef<ScrollView>(null);
+  
+  // Track whether lists are currently being scrolled
+  const isScrolling = useRef({ fixed: false, scrollable: false });
+  
+  /**
+   * Handle scroll events from the fixed list
+   */
+  const handleFixedScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!isScrolling.current.scrollable) {
+      isScrolling.current.fixed = true;
+      const offsetY = event.nativeEvent.contentOffset.y;
+      scrollY.setValue(offsetY);
+
+      scrollableListRef.current?.scrollToOffset({
+        offset: offsetY,
+        animated: false
+      });
+
+      requestAnimationFrame(() => {
+        isScrolling.current.fixed = false;
+      });
+    }
+  }, [scrollY]);
+
+  /**
+   * Handle scroll events from the scrollable list
+   */
+  const handleScrollableScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!isScrolling.current.fixed) {
+      isScrolling.current.scrollable = true;
+      const offsetY = event.nativeEvent.contentOffset.y;
+      scrollY.setValue(offsetY);
+
+      fixedListRef.current?.scrollToOffset({
+        offset: offsetY,
+        animated: false
+      });
+
+      requestAnimationFrame(() => {
+        isScrolling.current.scrollable = false;
+      });
+    }
+  }, [scrollY]);
+
+  /**
+   * Handle horizontal scroll events
+   */
+  const handleHorizontalScroll = enableHorizontalScroll
+    ? Animated.event(
+        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+        { useNativeDriver: false }
+      )
+    : undefined;
+
+  return {
+    // Animation values
+    scrollY,
+    scrollX,
+    
+    // Refs
+    fixedListRef,
+    scrollableListRef,
+    horizontalScrollRef,
+    
+    // Handlers
+    handleFixedScroll,
+    handleScrollableScroll,
+    handleHorizontalScroll,
+  };
+};

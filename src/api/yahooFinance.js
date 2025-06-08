@@ -54,6 +54,8 @@ export async function fetchPriceData(symbol) {
     const sixMonthAgoPrice = sixMonthAgoIndex !== null ? validPrices[sixMonthAgoIndex] : null;
     const sixMonthReturn = sixMonthAgoPrice ? ((currentPrice - sixMonthAgoPrice) / sixMonthAgoPrice) * 100 : null;
 
+    const fiftyTwoWeekHigh = json.chart.result[0].meta.fiftyTwoWeekHigh || null;
+
     return {
       closingPrices: validPrices.slice(-30),
       currentPrice,
@@ -62,7 +64,8 @@ export async function fetchPriceData(symbol) {
       oneMonthReturn,
       threeMonthReturn,
       sixMonthReturn,
-      allPrices: validPrices
+      allPrices: validPrices,
+      fiftyTwoWeekHigh,
     };
   } catch (e) {
     console.error('Error fetching', symbol, e);

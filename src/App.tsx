@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,8 @@ import {
   StatusBar,
   ScrollView,
   Animated,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { formatSymbol } from './utils/data';
 import { TableHeader } from './components/TableHeader';
@@ -21,87 +20,81 @@ import { DetailsPage } from './components/DetailsPage';
 import { styles } from './styles/appStyles';
 import { AssetItem } from './types';
 import { useRSI } from './hooks/useRSI';
+import { useScrollSync } from './hooks/useScrollSync';
 import db from './db/database';
+import { AddSymbolModal } from './components/AddSymbolModal';
 
+/**
+ * Main application component
+ */
 export default function App(): React.JSX.Element {
-  const {
-    data,
-    status,
-    sortConfig,
-    loadRSI,
-    handleSort,
-    removeTicker,
-  } = useRSI();
-
+  // Initialize database
   useEffect(() => {
     db.init().catch(err => {
       console.error('Database initialization failed', err);
+      Alert.alert('Error', 'Failed to initialize database. Some features may not work properly.');
     });
   }, []);
+
+  // Get RSI data and related functions
+  const {
+    data,
+    status,
+    error,
+    isRefreshing,
+    sortConfig,
+    loadRSI,
+    handleSort,
+    addTicker,
+    removeTicker,
+  } = useRSI();
+
+  // State for UI components
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<AssetItem | null>(null);
-  const flatListRef = useRef<FlatList<AssetItem>>(null);
+  const [showAddSymbolModal, setShowAddSymbolModal] = useState<boolean>(false);
 
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const scrollX = useRef(new Animated.Value(0)).current;
+  // Set up scroll synchronization
+  const {
+    scrollY,
+    scrollX,
+    fixedListRef,
+    scrollableListRef,
+    horizontalScrollRef,
+    handleFixedScroll,
+    handleScrollableScroll,
+    handleHorizontalScroll,
+  } = useScrollSync<AssetItem>();
 
-  const fixedScrollRef = useRef<FlatList<AssetItem>>(null);
-  const scrollableScrollRef = useRef<FlatList<AssetItem>>(null);
-  const horizontalScrollRef = useRef<ScrollView>(null);
-
-  const isScrolling = useRef({ fixed: false, scrollable: false });
-
-  const handleFixedScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!isScrolling.current.scrollable) {
-      isScrolling.current.fixed = true;
-      const offsetY = event.nativeEvent.contentOffset.y;
-      scrollY.setValue(offsetY);
-
-      scrollableScrollRef.current?.scrollToOffset({
-        offset: offsetY,
-        animated: false
-      });
-
-      requestAnimationFrame(() => {
-        isScrolling.current.fixed = false;
-      });
-    }
-  }, [scrollY]);
-
-  const handleScrollableScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!isScrolling.current.scrollable) {
-      isScrolling.current.scrollable = true;
-      const offsetY = event.nativeEvent.contentOffset.y;
-      scrollY.setValue(offsetY);
-
-      fixedScrollRef.current?.scrollToOffset({
-        offset: offsetY,
-        animated: false
-      });
-
-      requestAnimationFrame(() => {
-        isScrolling.current.scrollable = false;
-      });
-    }
-  }, [scrollY]);
-
-  const handleHorizontalScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-    { useNativeDriver: false }
-  );
-
-  const handleSymbolPress = (item: AssetItem) => {
+  /**
+   * Handle press on a symbol to show details
+   */
+  const handleSymbolPress = useCallback((item: AssetItem) => {
     setSelectedItem(item);
     setShowDetailsPage(true);
-  };
+  }, []);
 
+  /**
+   * Handle back button press from details page
+   */
   const handleBackFromDetails = useCallback(() => {
     setShowDetailsPage(false);
     setSelectedItem(null);
   }, []);
 
+  /**
+   * Handle adding a new symbol
+   */
+  const handleAddSymbol = useCallback((symbol: string) => {
+    const formattedSymbol = formatSymbol(symbol);
+    addTicker(formattedSymbol);
+    setShowAddSymbolModal(false);
+  }, [addTicker]);
 
-  const deleteSymbol = (symbolToDelete: string) => {
+  /**
+   * Handle deleting a symbol
+   */
+  const handleDeleteSymbol = useCallback((symbolToDelete: string) => {
     Alert.alert(
       "Delete Symbol?",
       `Are you sure you want to remove ${symbolToDelete.replace('.NS', '')}?`,
@@ -110,23 +103,40 @@ export default function App(): React.JSX.Element {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
-            removeTicker(symbolToDelete);
-          },
+          onPress: () => removeTicker(symbolToDelete),
         },
       ],
       { cancelable: true }
     );
-  };
+  }, [removeTicker]);
 
-  const renderFixedRow = ({ item }: { item: AssetItem }) => (
-    <DataRow item={item} onDelete={deleteSymbol} onSymbolPress={handleSymbolPress} fixed scrollable={false} />
-  );
+  /**
+   * Render a row in the fixed column
+   */
+  const renderFixedRow = useCallback(({ item }: { item: AssetItem }) => (
+    <DataRow 
+      item={item} 
+      onDelete={handleDeleteSymbol} 
+      onSymbolPress={handleSymbolPress} 
+      fixed 
+      scrollable={false} 
+    />
+  ), [handleDeleteSymbol, handleSymbolPress]);
 
-  const renderScrollableRow = ({ item }: { item: AssetItem }) => (
-    <DataRow item={item} onDelete={deleteSymbol} onSymbolPress={handleSymbolPress} scrollable fixed={false} />
-  );
+  /**
+   * Render a row in the scrollable columns
+   */
+  const renderScrollableRow = useCallback(({ item }: { item: AssetItem }) => (
+    <DataRow 
+      item={item} 
+      onDelete={handleDeleteSymbol} 
+      onSymbolPress={handleSymbolPress} 
+      scrollable 
+      fixed={false} 
+    />
+  ), [handleDeleteSymbol, handleSymbolPress]);
 
+  // Show details page if an item is selected
   if (showDetailsPage && selectedItem) {
     return (
       <DetailsPage
@@ -139,52 +149,113 @@ export default function App(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#121212" />
-      <View style={styles.header}>
-        <Image source={require('./assets/icon.png')} style={{ width: 30, height: 30, marginRight: 10 }} />
-        <Text style={styles.header}>Nifty ETF Tracker</Text>
-      </View>
-
-      <View style={{ flex: 1 }}>
-        <TableHeader sortConfig={sortConfig} onSort={handleSort} scrollX={scrollX} />
-
-        <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Animated.FlatList
-            ref={fixedScrollRef}
-            data={data}
-            keyExtractor={(item) => `fixed-${item.ticker}`}
-            renderItem={renderFixedRow}
-            onScroll={handleFixedScroll}
-            scrollEventThrottle={16}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl refreshing={status === 'loading'} onRefresh={loadRSI} />
-            }
-            bounces={false}
-          />
-
-          <View style={{ flex: 15 }}>
-            <ScrollView
-              ref={horizontalScrollRef}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              onScroll={handleHorizontalScroll}
-              scrollEventThrottle={16}
-              bounces={false}
-            >
-              <Animated.FlatList
-                ref={scrollableScrollRef}
-                data={data}
-                keyExtractor={(item) => `scrollable-${item.ticker}`}
-                renderItem={renderScrollableRow}
-                onScroll={handleScrollableScroll}
-                scrollEventThrottle={16}
-                showsVerticalScrollIndicator={false}
-                bounces={false}
-              />
-            </ScrollView>
-          </View>
+      
+      {/* Header */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerLeft}>
+          <Image source={require('./assets/icon.png')} style={styles.headerIcon} />
+          <Text style={styles.headerTitle}>Nifty ETF Tracker</Text>
         </View>
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => setShowAddSymbolModal(true)}
+        >
+          <Text style={styles.addButtonText}>+</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Error message */}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {/* Main content */}
+      <View style={styles.contentContainer}>
+        {/* Table header */}
+        <TableHeader 
+          sortConfig={sortConfig} 
+          onSort={handleSort} 
+          scrollX={scrollX} 
+        />
+
+        {/* Loading indicator */}
+        {status === 'loading' && !isRefreshing && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#4CAF50" />
+            <Text style={styles.loadingText}>Loading data...</Text>
+          </View>
+        )}
+
+        {/* Table content */}
+        {data.length > 0 && (
+          <View style={styles.tableContainer}>
+            {/* Fixed column */}
+            <Animated.FlatList
+              ref={fixedListRef}
+              data={data}
+              keyExtractor={(item) => `fixed-${item.ticker}`}
+              renderItem={renderFixedRow}
+              onScroll={handleFixedScroll}
+              scrollEventThrottle={16}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl 
+                  refreshing={isRefreshing} 
+                  onRefresh={loadRSI} 
+                  colors={['#4CAF50']}
+                  tintColor="#4CAF50"
+                />
+              }
+              bounces={false}
+            />
+
+            {/* Scrollable columns */}
+            <View style={styles.scrollableColumnsContainer}>
+              <ScrollView
+                ref={horizontalScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleHorizontalScroll}
+                scrollEventThrottle={16}
+                bounces={false}
+              >
+                <Animated.FlatList
+                  ref={scrollableListRef}
+                  data={data}
+                  keyExtractor={(item) => `scrollable-${item.ticker}`}
+                  renderItem={renderScrollableRow}
+                  onScroll={handleScrollableScroll}
+                  scrollEventThrottle={16}
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
+                />
+              </ScrollView>
+            </View>
+          </View>
+        )}
+
+        {/* Empty state */}
+        {data.length === 0 && status !== 'loading' && (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No assets to display.</Text>
+            <TouchableOpacity 
+              style={styles.emptyButton}
+              onPress={() => setShowAddSymbolModal(true)}
+            >
+              <Text style={styles.emptyButtonText}>Add Symbol</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      {/* Add symbol modal */}
+      <AddSymbolModal
+        visible={showAddSymbolModal}
+        onClose={() => setShowAddSymbolModal(false)}
+        onAdd={handleAddSymbol}
+      />
     </SafeAreaView>
   );
 }
