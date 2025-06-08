@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,25 +13,25 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import { DEFAULT_TICKERS } from './constants/tickers';
-import { fetchPriceData } from './api/yahooFinance';
-import { calculateRSI } from './utils/calculations';
-import { formatSymbol, sortData } from './utils/data';
+import { formatSymbol } from './utils/data';
 import { TableHeader } from './components/TableHeader';
 import { DataRow } from './components/DataRow';
 import { DetailsPage } from './components/DetailsPage';
 import { AddSymbolModal } from './components/AddSymbolModal';
 import { styles } from './styles/appStyles';
-import { AssetItem, SortConfig } from './types';
-
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from './store';
-import { fetchAssets, sortAssets } from './store/slices/assetsSlice';
+import { AssetItem } from './types';
+import { useRSI } from './hooks/useRSI';
 
 export default function App(): React.JSX.Element {
-  const dispatch = useDispatch<AppDispatch>();
-  const { items: data, status, sortConfig } = useSelector((state: RootState) => state.assets);
-  const [tickers, setTickers] = useState<string[]>([]);
+  const {
+    data,
+    status,
+    sortConfig,
+    loadRSI,
+    handleSort,
+    addTicker,
+    removeTicker,
+  } = useRSI();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<AssetItem | null>(null);
@@ -85,28 +85,6 @@ export default function App(): React.JSX.Element {
     { useNativeDriver: false }
   );
 
-  useEffect(() => {
-    setTickers(DEFAULT_TICKERS);
-  }, []);
-
-  const loadRSI = useCallback(() => {
-    if (tickers.length > 0) {
-      dispatch(fetchAssets(tickers));
-    }
-  }, [dispatch, tickers]);
-
-  useEffect(() => {
-    loadRSI();
-  }, [loadRSI]);
-
-  const handleSort = (key: keyof AssetItem) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    dispatch(sortAssets({ key, direction }));
-  };
-
   const handleSymbolPress = (item: AssetItem) => {
     setSelectedItem(item);
     setShowDetailsPage(true);
@@ -119,12 +97,7 @@ export default function App(): React.JSX.Element {
 
   const addSymbol = (symbol: string) => {
     const formattedSymbol = formatSymbol(symbol);
-    if (tickers.includes(formattedSymbol)) {
-      Alert.alert('Error', 'This symbol is already in your list');
-      return;
-    }
-    const newTickers = [...tickers, formattedSymbol];
-    setTickers(newTickers);
+    addTicker(formattedSymbol);
     setModalVisible(false);
   };
 
@@ -138,8 +111,7 @@ export default function App(): React.JSX.Element {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            const newTickers = tickers.filter(ticker => ticker !== symbolToDelete);
-            setTickers(newTickers);
+            removeTicker(symbolToDelete);
           },
         },
       ],

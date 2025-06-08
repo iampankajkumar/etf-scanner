@@ -3,12 +3,14 @@ import { AssetItem, SortConfig } from '../../types';
 import { fetchPriceData } from '../../api/yahooFinance';
 import { calculateRSI } from '../../utils/calculations';
 import { sortData } from '../../utils/data';
+import { DEFAULT_TICKERS } from '../../constants/tickers';
 
 interface AssetsState {
   items: AssetItem[];
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   sortConfig: SortConfig;
+  tickers: string[];
 }
 
 const initialState: AssetsState = {
@@ -16,9 +18,12 @@ const initialState: AssetsState = {
   status: 'idle',
   error: null,
   sortConfig: { key: 'rsi', direction: 'asc' },
+  tickers: DEFAULT_TICKERS,
 };
 
-export const fetchAssets = createAsyncThunk('assets/fetchAssets', async (tickers: string[]) => {
+export const fetchAssets = createAsyncThunk('assets/fetchAssets', async (_, { getState }) => {
+  const { assets } = getState() as { assets: AssetsState };
+  const { tickers } = assets;
   const result = await Promise.all(
     tickers.map(async (ticker) => {
       const {
@@ -75,6 +80,14 @@ const assetsSlice = createSlice({
         state.items = sortData([...state.items], key, direction);
       }
     },
+    addTicker: (state, action: PayloadAction<string>) => {
+      if (!state.tickers.includes(action.payload)) {
+        state.tickers.push(action.payload);
+      }
+    },
+    removeTicker: (state, action: PayloadAction<string>) => {
+      state.tickers = state.tickers.filter((ticker) => ticker !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -96,5 +109,5 @@ const assetsSlice = createSlice({
   },
 });
 
-export const { sortAssets } = assetsSlice.actions;
+export const { sortAssets, addTicker, removeTicker } = assetsSlice.actions;
 export default assetsSlice.reducer;

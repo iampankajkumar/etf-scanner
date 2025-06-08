@@ -349,4 +349,17 @@ export const styles = StyleSheet.create({
     marginTop: sizes.base / 2,
     fontWeight: 'bold',
   },
+  line: {
+    height: 2,
+    backgroundColor: colors.primary,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+  },
+  lineText: {
+    position: 'absolute',
+    top: -20,
+    fontSize: 12,
+    color: colors.text,
+  },
 });
