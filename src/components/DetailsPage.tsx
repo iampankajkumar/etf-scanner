@@ -51,8 +51,8 @@ export function DetailsPage({ item, onBack }: DetailsPageProps): React.JSX.Eleme
 
     const values = filteredPrices.map(p => p.price);
     return {
-      min: Math.min(...values),
-      max: Math.max(...values),
+      min: Math.min(...values, item.rawCurrentPrice || values[0]),
+      max: Math.max(...values, item.rawCurrentPrice || values[0]),
     };
   };
 

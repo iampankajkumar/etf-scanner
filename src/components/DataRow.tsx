@@ -42,19 +42,46 @@ export function DataRow({ item, onDelete, onSymbolPress, fixed, scrollable }: Da
           <Text style={[styles.dataCell, { color: getColor(item.rsi) }]}>
             {item.rsi}
           </Text>
-          <Text style={[styles.dataCell, { color: getReturnColor(item.oneDayReturn) }]}>
+          <Text
+            style={[
+              styles.dataCell,
+              { color: getReturnColor(item.oneDayReturn) },
+            ]}
+          >
             {item.oneDayReturn}
           </Text>
-          <Text style={[styles.dataCell, { color: getReturnColor(item.oneWeekReturn) }]}>
+          <Text
+            style={[
+              styles.dataCell,
+              { color: getReturnColor(item.oneWeekReturn) },
+            ]}
+          >
             {item.oneWeekReturn}
           </Text>
-          <Text style={[styles.dataCell, { color: getReturnColor(item.oneMonthReturn) }]}>
+          <Text
+            style={[
+              styles.dataCell,
+              { color: getReturnColor(item.oneMonthReturn) },
+            ]}
+          >
             {item.oneMonthReturn}
           </Text>
-          <Text style={[styles.dataCell, { color: getReturnColor(formatReturn(item.rawThreeMonthReturn)) }]}>
+          <Text
+            style={[
+              styles.dataCell,
+              {
+                color: getReturnColor(formatReturn(item.rawThreeMonthReturn)),
+              },
+            ]}
+          >
             {formatReturn(item.rawThreeMonthReturn)}
           </Text>
-          <Text style={[styles.dataCell, { color: getReturnColor(formatReturn(item.rawSixMonthReturn)) }]}>
+          <Text
+            style={[
+              styles.dataCell,
+              { color: getReturnColor(formatReturn(item.rawSixMonthReturn)) },
+            ]}
+          >
             {formatReturn(item.rawSixMonthReturn)}
           </Text>
         </View>

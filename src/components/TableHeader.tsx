@@ -26,37 +26,37 @@ export function TableHeader({ sortConfig, onSort, scrollX }: TableHeaderProps): 
       </View>
       <Animated.View style={[styles.scrollableHeaders, { transform: [{ translateX: Animated.multiply(scrollX, -1) }] }]}>
         <View style={styles.headerRow}>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('currentPrice')}>
+          <TouchableOpacity onPress={() => onSort('currentPrice')}>
             <Text style={styles.headerCell}>
               Price {getSortIndicator('currentPrice')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('rsi')}>
+          <TouchableOpacity onPress={() => onSort('rsi')}>
             <Text style={styles.headerCell}>
               RSI {getSortIndicator('rsi')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('oneDayReturn')}>
+          <TouchableOpacity onPress={() => onSort('oneDayReturn')}>
             <Text style={styles.headerCell}>
               1D {getSortIndicator('oneDayReturn')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('oneWeekReturn')}>
+          <TouchableOpacity onPress={() => onSort('oneWeekReturn')}>
             <Text style={styles.headerCell}>
               1W {getSortIndicator('oneWeekReturn')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('oneMonthReturn')}>
+          <TouchableOpacity onPress={() => onSort('oneMonthReturn')}>
             <Text style={styles.headerCell}>
               1M {getSortIndicator('oneMonthReturn')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('rawThreeMonthReturn')}>
+          <TouchableOpacity onPress={() => onSort('rawThreeMonthReturn')}>
             <Text style={styles.headerCell}>
               3M {getSortIndicator('rawThreeMonthReturn')}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => onSort('rawSixMonthReturn')}>
+          <TouchableOpacity onPress={() => onSort('rawSixMonthReturn')}>
             <Text style={styles.headerCell}>
               6M {getSortIndicator('rawSixMonthReturn')}
             </Text>

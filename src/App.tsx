@@ -12,12 +12,12 @@ import {
   Animated,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Image,
 } from 'react-native';
 import { formatSymbol } from './utils/data';
 import { TableHeader } from './components/TableHeader';
 import { DataRow } from './components/DataRow';
 import { DetailsPage } from './components/DetailsPage';
-import { AddSymbolModal } from './components/AddSymbolModal';
 import { styles } from './styles/appStyles';
 import { AssetItem } from './types';
 import { useRSI } from './hooks/useRSI';
@@ -30,7 +30,6 @@ export default function App(): React.JSX.Element {
     sortConfig,
     loadRSI,
     handleSort,
-    addTicker,
     removeTicker,
   } = useRSI();
 
@@ -39,7 +38,6 @@ export default function App(): React.JSX.Element {
       console.error('Database initialization failed', err);
     });
   }, []);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<AssetItem | null>(null);
   const flatListRef = useRef<FlatList<AssetItem>>(null);
@@ -102,11 +100,6 @@ export default function App(): React.JSX.Element {
     setSelectedItem(null);
   }, []);
 
-  const addSymbol = (symbol: string) => {
-    const formattedSymbol = formatSymbol(symbol);
-    addTicker(formattedSymbol);
-    setModalVisible(false);
-  };
 
   const deleteSymbol = (symbolToDelete: string) => {
     Alert.alert(
@@ -146,13 +139,10 @@ export default function App(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#121212" />
-      <Text style={styles.header}>📊 Nifty ETF Tracker</Text>
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.addButtonText}>+ Add Symbol</Text>
-      </TouchableOpacity>
+      <View style={styles.header}>
+        <Image source={require('./assets/icon.png')} style={{ width: 30, height: 30, marginRight: 10 }} />
+        <Text style={styles.header}>Nifty ETF Tracker</Text>
+      </View>
 
       <View style={{ flex: 1 }}>
         <TableHeader sortConfig={sortConfig} onSort={handleSort} scrollX={scrollX} />
@@ -195,11 +185,6 @@ export default function App(): React.JSX.Element {
           </View>
         </View>
       </View>
-      <AddSymbolModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onAdd={addSymbol}
-      />
     </SafeAreaView>
   );
 }

@@ -37,7 +37,7 @@ export const getAssetData = async (symbol: string): Promise<AssetItem> => {
     rawOneMonthReturn: priceData.oneMonthReturn ?? null,
     rawThreeMonthReturn: priceData.threeMonthReturn ?? null,
     rawSixMonthReturn: priceData.sixMonthReturn ?? null,
-    allPrices: priceData.allPrices?.map((price: number, index: number) => ({ date: new Date(new Date().setDate(new Date().getDate() - index)).toISOString().split('T')[0], price })) || [],
+    allPrices: priceData.allPrices?.map((price: number, index: number) => ({ date: new Date(new Date().setDate(new Date().getDate() - index)).toISOString(), price })) || [],
   };
 
   await db.db.runAsync(
