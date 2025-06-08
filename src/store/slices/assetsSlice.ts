@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AssetItem, SortConfig } from '../../types';
-import { fetchPriceData } from '../../api/yahooFinance';
-import { calculateRSI } from '../../utils/calculations';
+import { getAssetData } from '../../services/assetService';
 import { sortData } from '../../utils/data';
 import { DEFAULT_TICKERS } from '../../constants/tickers';
 
@@ -25,46 +24,7 @@ export const fetchAssets = createAsyncThunk('assets/fetchAssets', async (_, { ge
   const { assets } = getState() as { assets: AssetsState };
   const { tickers } = assets;
   const result = await Promise.all(
-    tickers.map(async (ticker) => {
-      const {
-        closingPrices,
-        currentPrice,
-        oneDayReturn,
-        oneWeekReturn,
-        oneMonthReturn,
-        threeMonthReturn,
-        sixMonthReturn,
-        allPrices,
-      } = await fetchPriceData(ticker);
-
-      const rsiArray = calculateRSI(closingPrices);
-      const rsi = rsiArray.length ? parseFloat(rsiArray[rsiArray.length - 1].toFixed(2)) : 'N/A';
-
-      const formattedOneDayReturn =
-        oneDayReturn !== null ? (oneDayReturn > 0 ? '+' : '') + oneDayReturn.toFixed(2) + '%' : 'N/A';
-      const formattedOneWeekReturn =
-        oneWeekReturn !== null ? (oneWeekReturn > 0 ? '+' : '') + oneWeekReturn.toFixed(2) + '%' : 'N/A';
-      const formattedOneMonthReturn =
-        oneMonthReturn !== null && oneMonthReturn !== undefined ? (oneMonthReturn > 0 ? '+' : '') + oneMonthReturn.toFixed(2) + '%' : 'N/A';
-
-      const assetItem: AssetItem = {
-        ticker,
-        rsi,
-        currentPrice: currentPrice !== null ? currentPrice.toFixed(2) : 'N/A',
-        oneDayReturn: formattedOneDayReturn,
-        oneWeekReturn: formattedOneWeekReturn,
-        oneMonthReturn: formattedOneMonthReturn,
-        rawRsi: rsi === 'N/A' ? null : rsi,
-        rawCurrentPrice: currentPrice,
-        rawOneDayReturn: oneDayReturn,
-        rawOneWeekReturn: oneWeekReturn,
-        rawOneMonthReturn: oneMonthReturn ?? null,
-        rawThreeMonthReturn: threeMonthReturn ?? null,
-        rawSixMonthReturn: sixMonthReturn ?? null,
-        allPrices: allPrices ?? [],
-      };
-      return assetItem;
-    })
+    tickers.map(ticker => getAssetData(ticker))
   );
   return result;
 });

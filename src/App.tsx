@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { AddSymbolModal } from './components/AddSymbolModal';
 import { styles } from './styles/appStyles';
 import { AssetItem } from './types';
 import { useRSI } from './hooks/useRSI';
+import db from './db/database';
 
 export default function App(): React.JSX.Element {
   const {
@@ -32,6 +33,12 @@ export default function App(): React.JSX.Element {
     addTicker,
     removeTicker,
   } = useRSI();
+
+  useEffect(() => {
+    db.init().catch(err => {
+      console.error('Database initialization failed', err);
+    });
+  }, []);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<AssetItem | null>(null);
