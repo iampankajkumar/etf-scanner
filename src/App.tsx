@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
-  Text,
   FlatList,
   RefreshControl,
   TouchableOpacity,
@@ -13,7 +12,11 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import { Text } from './components/atoms/Text';
+import { Entypo } from '@expo/vector-icons';
 import { formatSymbol } from './utils/data';
+import { CustomMenu } from './components/molecules';
+import { colors } from './theme/colors';
 import { TableHeader } from './components/TableHeader';
 import { DataRow } from './components/DataRow';
 import { DetailsPage } from './components/DetailsPage';
@@ -22,7 +25,6 @@ import { AssetItem } from './types';
 import { useRSI } from './hooks/useRSI';
 import { useScrollSync } from './hooks/useScrollSync';
 import db from './db/database';
-import { AddSymbolModal } from './components/AddSymbolModal';
 
 /**
  * Main application component
@@ -52,7 +54,7 @@ export default function App(): React.JSX.Element {
   // State for UI components
   const [showDetailsPage, setShowDetailsPage] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<AssetItem | null>(null);
-  const [showAddSymbolModal, setShowAddSymbolModal] = useState<boolean>(false);
+  const [menuVisible, setMenuVisible] = useState<boolean>(false);
 
   // Set up scroll synchronization
   const {
@@ -81,15 +83,6 @@ export default function App(): React.JSX.Element {
     setShowDetailsPage(false);
     setSelectedItem(null);
   }, []);
-
-  /**
-   * Handle adding a new symbol
-   */
-  const handleAddSymbol = useCallback((symbol: string) => {
-    const formattedSymbol = formatSymbol(symbol);
-    addTicker(formattedSymbol);
-    setShowAddSymbolModal(false);
-  }, [addTicker]);
 
   /**
    * Handle deleting a symbol
@@ -147,115 +140,123 @@ export default function App(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#121212" />
-      
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <View style={styles.headerLeft}>
-          <Image source={require('./assets/icon.png')} style={styles.headerIcon} />
-          <Text style={styles.headerTitle}>Nifty ETF Tracker</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#121212" translucent />
+        
+        {/* Header */}
+        <View style={styles.headerContainer}>
+          <View style={styles.headerLeft}>
+            <Image source={require('./assets/icon.png')} style={styles.headerIcon} />
+            <Text style={styles.headerTitle}>Nifty ETF Tracker</Text>
+          </View>
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
+            <Entypo name="dots-three-vertical" size={24} color={colors.text} />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => setShowAddSymbolModal(true)}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Error message */}
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
-
-      {/* Main content */}
-      <View style={styles.contentContainer}>
-        {/* Table header */}
-        <TableHeader 
-          sortConfig={sortConfig} 
-          onSort={handleSort} 
-          scrollX={scrollX} 
+        <CustomMenu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          items={[
+            {
+              title: 'Settings',
+              onPress: () => Alert.alert('Settings', 'Settings page coming soon!'),
+            },
+            {
+              title: 'Dark Mode',
+              onPress: () => Alert.alert('Dark Mode', 'Theme settings coming soon!'),
+            },
+            {
+              title: 'About',
+              onPress: () => Alert.alert('About', 'RSI Tracker v1.0.0\nBuilt with ❤️ using React Native'),
+            },
+            {
+              title: 'Help',
+              onPress: () => Alert.alert('Help', 'Help center coming soon!'),
+            },
+          ]}
         />
 
-        {/* Loading indicator */}
-        {status === 'loading' && !isRefreshing && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#4CAF50" />
-            <Text style={styles.loadingText}>Loading data...</Text>
+        {/* Error message */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
 
-        {/* Table content */}
-        {data.length > 0 && (
-          <View style={styles.tableContainer}>
-            {/* Fixed column */}
-            <Animated.FlatList
-              ref={fixedListRef}
-              data={data}
-              keyExtractor={(item) => `fixed-${item.ticker}`}
-              renderItem={renderFixedRow}
-              onScroll={handleFixedScroll}
-              scrollEventThrottle={16}
-              showsVerticalScrollIndicator={false}
-              refreshControl={
-                <RefreshControl 
-                  refreshing={isRefreshing} 
-                  onRefresh={loadRSI} 
-                  colors={['#4CAF50']}
-                  tintColor="#4CAF50"
-                />
-              }
-              bounces={false}
-            />
+        {/* Main content */}
+        <View style={styles.contentContainer}>
+          {/* Table header */}
+          <TableHeader 
+            sortConfig={sortConfig} 
+            onSort={handleSort} 
+            scrollX={scrollX} 
+          />
 
-            {/* Scrollable columns */}
-            <View style={styles.scrollableColumnsContainer}>
-              <ScrollView
-                ref={horizontalScrollRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleHorizontalScroll}
-                scrollEventThrottle={16}
-                bounces={false}
-              >
-                <Animated.FlatList
-                  ref={scrollableListRef}
-                  data={data}
-                  keyExtractor={(item) => `scrollable-${item.ticker}`}
-                  renderItem={renderScrollableRow}
-                  onScroll={handleScrollableScroll}
-                  scrollEventThrottle={16}
-                  showsVerticalScrollIndicator={false}
-                  bounces={false}
-                />
-              </ScrollView>
+          {/* Loading indicator */}
+          {status === 'loading' && !isRefreshing && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#4CAF50" />
+              <Text style={styles.loadingText}>Loading data...</Text>
             </View>
-          </View>
-        )}
+          )}
 
-        {/* Empty state */}
-        {data.length === 0 && status !== 'loading' && (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No assets to display.</Text>
-            <TouchableOpacity 
-              style={styles.emptyButton}
-              onPress={() => setShowAddSymbolModal(true)}
-            >
-              <Text style={styles.emptyButtonText}>Add Symbol</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          {/* Table content */}
+          {data.length > 0 && (
+            <View style={styles.tableContainer}>
+              {/* Fixed column */}
+              <Animated.FlatList
+                ref={fixedListRef}
+                data={data}
+                keyExtractor={(item) => `fixed-${item.ticker}`}
+                renderItem={renderFixedRow}
+                onScroll={handleFixedScroll}
+                scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                  <RefreshControl 
+                    refreshing={isRefreshing} 
+                    onRefresh={loadRSI} 
+                    colors={['#4CAF50']}
+                    tintColor="#4CAF50"
+                  />
+                }
+                bounces={false}
+              />
+
+              {/* Scrollable columns */}
+              <View style={styles.scrollableColumnsContainer}>
+                <ScrollView
+                  ref={horizontalScrollRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={handleHorizontalScroll}
+                  scrollEventThrottle={16}
+                  bounces={false}
+                >
+                  <Animated.FlatList
+                    ref={scrollableListRef}
+                    data={data}
+                    keyExtractor={(item) => `scrollable-${item.ticker}`}
+                    renderItem={renderScrollableRow}
+                    onScroll={handleScrollableScroll}
+                    scrollEventThrottle={16}
+                    showsVerticalScrollIndicator={false}
+                    bounces={false}
+                  />
+                </ScrollView>
+              </View>
+            </View>
+          )}
+
+          {/* Empty state */}
+          {data.length === 0 && status !== 'loading' && (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No assets to display.</Text>
+            </View>
+          )}
+        </View>
       </View>
-
-      {/* Add symbol modal */}
-      <AddSymbolModal
-        visible={showAddSymbolModal}
-        onClose={() => setShowAddSymbolModal(false)}
-        onAdd={handleAddSymbol}
-      />
     </SafeAreaView>
   );
 }

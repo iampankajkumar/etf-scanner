@@ -1,12 +1,17 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, StatusBar } from 'react-native';
 import { colors } from '../theme/colors';
 import { sizes } from '../theme/sizes';
 
 export const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.background,
     paddingHorizontal: sizes.base,
+    paddingTop: StatusBar.currentHeight || 0,
   },
   header: {
     flexDirection: 'row',
@@ -42,6 +47,13 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.text,
   },
+  menuButton: {
+    padding: 8,
+    margin: 4,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   addButton: {
     width: 36,
     height: 36,
@@ -49,11 +61,6 @@ export const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  addButtonText: {
-    fontSize: sizes.h2,
-    color: colors.text,
-    fontWeight: 'bold',
   },
   errorContainer: {
     backgroundColor: colors.error,
@@ -103,8 +110,8 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: sizes.body,
     color: colors.textSecondary,
-    textAlign: 'center',
-    width: 80,
+    textAlign: 'right',
+    width: 100,
     paddingHorizontal: sizes.base,
     paddingVertical: sizes.base,
   },
@@ -155,7 +162,8 @@ export const styles = StyleSheet.create({
     fontSize: sizes.body,
     fontWeight: 'bold',
     textAlign: 'right',
-    width: 80,
+    width: 100,
+    paddingHorizontal: sizes.base,
     color: colors.text,
   },
   priceCell: {
@@ -327,7 +335,7 @@ export const styles = StyleSheet.create({
     fontSize: sizes.caption,
     color: colors.textMuted,
   },
-  
+
   // Modal Styles
   modalOverlay: {
     flex: 1,

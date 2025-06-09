@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
+import { Text } from './atoms/Text';
 import { styles } from '../styles/appStyles';
 import { getColor, getReturnColor, getDiscountColor } from '../utils/ui';
 import { formatReturn } from '../utils/data';

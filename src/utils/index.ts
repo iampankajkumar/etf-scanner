@@ -8,5 +8,7 @@
 export * from './calculations';
 export * from './data';
 export * from './ui';
+export * from './errors';
+export * from './logger';
 
 // Add more utility exports as needed

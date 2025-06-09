@@ -6,5 +6,6 @@
  */
 
 export * from './DataCell';
+export * from './CustomMenu';
 
 // Add more molecule component exports as needed

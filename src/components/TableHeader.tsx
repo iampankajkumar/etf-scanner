@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { View, TouchableOpacity, Animated } from 'react-native';
+import { Text } from './atoms/Text';
 import { styles } from '../styles/appStyles';
 import { SortConfig, AssetItem } from '../types';
 

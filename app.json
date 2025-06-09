@@ -4,6 +4,7 @@
     "slug": "snack-7277bfcb-ab0a-444e-83fd-a8e21d072de0",
     "version": "1.0.0",
     "orientation": "portrait",
+    "sdkVersion": "53.0.0",
     "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
