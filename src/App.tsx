@@ -20,6 +20,7 @@ import { colors } from './theme/colors';
 import { TableHeader } from './components/TableHeader';
 import { DataRow } from './components/DataRow';
 import { DetailsPage } from './components/DetailsPage';
+import { BannerAd } from './components/BannerAd';
 import { styles } from './styles/appStyles';
 import { AssetItem } from './types';
 import { useRSI } from './hooks/useRSI';
@@ -47,8 +48,6 @@ export default function App(): React.JSX.Element {
     sortConfig,
     loadRSI,
     handleSort,
-    addTicker,
-    removeTicker,
   } = useRSI();
 
   // State for UI components
@@ -84,37 +83,19 @@ export default function App(): React.JSX.Element {
     setSelectedItem(null);
   }, []);
 
-  /**
-   * Handle deleting a symbol
-   */
-  const handleDeleteSymbol = useCallback((symbolToDelete: string) => {
-    Alert.alert(
-      "Delete Symbol?",
-      `Are you sure you want to remove ${symbolToDelete.replace('.NS', '')}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => removeTicker(symbolToDelete),
-        },
-      ],
-      { cancelable: true }
-    );
-  }, [removeTicker]);
-
+  
   /**
    * Render a row in the fixed column
    */
   const renderFixedRow = useCallback(({ item }: { item: AssetItem }) => (
     <DataRow 
       item={item} 
-      onDelete={handleDeleteSymbol} 
+      onDelete={() => {}} 
       onSymbolPress={handleSymbolPress} 
       fixed 
       scrollable={false} 
     />
-  ), [handleDeleteSymbol, handleSymbolPress]);
+  ), [handleSymbolPress]);
 
   /**
    * Render a row in the scrollable columns
@@ -122,12 +103,12 @@ export default function App(): React.JSX.Element {
   const renderScrollableRow = useCallback(({ item }: { item: AssetItem }) => (
     <DataRow 
       item={item} 
-      onDelete={handleDeleteSymbol} 
+      onDelete={() => {}} 
       onSymbolPress={handleSymbolPress} 
       scrollable 
       fixed={false} 
     />
-  ), [handleDeleteSymbol, handleSymbolPress]);
+  ), [handleSymbolPress]);
 
   // Show details page if an item is selected
   if (showDetailsPage && selectedItem) {
@@ -145,7 +126,7 @@ export default function App(): React.JSX.Element {
         <StatusBar barStyle="light-content" backgroundColor="#121212" translucent />
         
         {/* Header */}
-        <View style={styles.headerContainer}>
+        <View style={styles.appHeaderContainer}>
           <View style={styles.headerLeft}>
             <Image source={require('./assets/icon.png')} style={styles.headerIcon} />
             <Text style={styles.headerTitle}>Nifty ETF Tracker</Text>
@@ -208,10 +189,10 @@ export default function App(): React.JSX.Element {
               <Animated.FlatList
                 ref={fixedListRef}
                 data={data}
-                keyExtractor={(item) => `fixed-${item.ticker}`}
+                keyExtractor={(item) => item.ticker}
                 renderItem={renderFixedRow}
                 onScroll={handleFixedScroll}
-                scrollEventThrottle={16}
+                scrollEventThrottle={8}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                   <RefreshControl 
@@ -222,6 +203,18 @@ export default function App(): React.JSX.Element {
                   />
                 }
                 bounces={false}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={5}
+                updateCellsBatchingPeriod={100}
+                initialNumToRender={10}
+                windowSize={5}
+                legacyImplementation={false}
+                disableVirtualization={false}
+                getItemLayout={(data, index) => ({
+                  length: 50, // Approximate row height
+                  offset: 50 * index,
+                  index,
+                })}
               />
 
               {/* Scrollable columns */}
@@ -237,12 +230,24 @@ export default function App(): React.JSX.Element {
                   <Animated.FlatList
                     ref={scrollableListRef}
                     data={data}
-                    keyExtractor={(item) => `scrollable-${item.ticker}`}
+                    keyExtractor={(item) => item.ticker}
                     renderItem={renderScrollableRow}
                     onScroll={handleScrollableScroll}
-                    scrollEventThrottle={16}
+                    scrollEventThrottle={8}
                     showsVerticalScrollIndicator={false}
                     bounces={false}
+                    removeClippedSubviews={true}
+                    maxToRenderPerBatch={5}
+                    updateCellsBatchingPeriod={100}
+                    initialNumToRender={10}
+                    windowSize={5}
+                    legacyImplementation={false}
+                    disableVirtualization={false}
+                    getItemLayout={(data, index) => ({
+                      length: 50, // Approximate row height
+                      offset: 50 * index,
+                      index,
+                    })}
                   />
                 </ScrollView>
               </View>
@@ -257,6 +262,9 @@ export default function App(): React.JSX.Element {
           )}
         </View>
       </View>
+      
+      {/* Banner Ad */}
+      <BannerAd testMode={true} />
     </SafeAreaView>
   );
 }

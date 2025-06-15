@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
-import { fetchAssets, sortAssets, addTicker, removeTicker } from '../store/slices/assetsSlice';
+import { fetchAssets, sortAssets } from '../store/slices/assetsSlice';
 import { AssetItem, SortConfig } from '../types';
 
 /**
@@ -10,7 +10,7 @@ import { AssetItem, SortConfig } from '../types';
  */
 export const useRSI = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { items: data, status, error, sortConfig, tickers } = useSelector((state: RootState) => state.assets);
+  const { items: data, status, error, sortConfig } = useSelector((state: RootState) => state.assets);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   /**
@@ -46,36 +46,13 @@ export const useRSI = () => {
     dispatch(sortAssets({ key, direction }));
   }, [dispatch, sortConfig]);
 
-  /**
-   * Add a ticker to track
-   * @param ticker The ticker symbol to add
-   */
-  const handleAddTicker = useCallback((ticker: string) => {
-    if (!ticker.trim()) return;
-    
-    dispatch(addTicker(ticker.trim()));
-    // Refresh data to include the new ticker
-    handleLoadRSI();
-  }, [dispatch, handleLoadRSI]);
-
-  /**
-   * Remove a ticker from tracking
-   * @param ticker The ticker symbol to remove
-   */
-  const handleRemoveTicker = useCallback((ticker: string) => {
-    dispatch(removeTicker(ticker));
-  }, [dispatch]);
-
   return {
     data,
     status,
     error,
     isRefreshing,
     sortConfig,
-    tickers,
     loadRSI: handleLoadRSI,
     handleSort,
-    addTicker: handleAddTicker,
-    removeTicker: handleRemoveTicker,
   };
 };

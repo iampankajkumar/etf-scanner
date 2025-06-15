@@ -8,8 +8,10 @@
  * Table column widths
  */
 export const COLUMN_WIDTHS = {
-  TICKER: 100,
-  DATA_CELL: 80,
+  TICKER: 90,
+  DATA_CELL: 75,
+  VOLUME_CELL: 90,
+  PRICE_CELL: 80,
 };
 
 /**
@@ -59,4 +61,12 @@ export const RSI_THRESHOLDS = {
 export const MODAL = {
   WIDTH: '80%',
   BORDER_RADIUS: 8,
+};
+
+/**
+ * Banner ad dimensions
+ */
+export const BANNER_AD = {
+  HEIGHT: 60, // Standard banner ad height (50px + padding)
+  PADDING: 10, // Extra padding around the ad
 };

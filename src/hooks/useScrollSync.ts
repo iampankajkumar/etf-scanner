@@ -40,42 +40,60 @@ export const useScrollSync = <T,>(props?: UseScrollSyncProps) => {
   /**
    * Handle scroll events from the fixed list
    */
-  const handleFixedScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!isScrolling.current.scrollable) {
-      isScrolling.current.fixed = true;
-      const offsetY = event.nativeEvent.contentOffset.y;
-      scrollY.setValue(offsetY);
+  const handleFixedScroll = useCallback(
+    Animated.event(
+      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      {
+        useNativeDriver: false,
+        listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+          if (!isScrolling.current.scrollable) {
+            isScrolling.current.fixed = true;
+            const offsetY = event.nativeEvent.contentOffset.y;
 
-      scrollableListRef.current?.scrollToOffset({
-        offset: offsetY,
-        animated: false
-      });
+            scrollableListRef.current?.scrollToOffset({
+              offset: offsetY,
+              animated: false
+            });
 
-      requestAnimationFrame(() => {
-        isScrolling.current.fixed = false;
-      });
-    }
-  }, [scrollY]);
+            // Use setTimeout instead of requestAnimationFrame for better performance
+            setTimeout(() => {
+              isScrolling.current.fixed = false;
+            }, 0);
+          }
+        }
+      }
+    ),
+    [scrollY]
+  );
 
   /**
    * Handle scroll events from the scrollable list
    */
-  const handleScrollableScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (!isScrolling.current.fixed) {
-      isScrolling.current.scrollable = true;
-      const offsetY = event.nativeEvent.contentOffset.y;
-      scrollY.setValue(offsetY);
+  const handleScrollableScroll = useCallback(
+    Animated.event(
+      [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+      {
+        useNativeDriver: false,
+        listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+          if (!isScrolling.current.fixed) {
+            isScrolling.current.scrollable = true;
+            const offsetY = event.nativeEvent.contentOffset.y;
 
-      fixedListRef.current?.scrollToOffset({
-        offset: offsetY,
-        animated: false
-      });
+            fixedListRef.current?.scrollToOffset({
+              offset: offsetY,
+              animated: false
+            });
 
-      requestAnimationFrame(() => {
-        isScrolling.current.scrollable = false;
-      });
-    }
-  }, [scrollY]);
+            // Use setTimeout instead of requestAnimationFrame for better performance
+            setTimeout(() => {
+              isScrolling.current.scrollable = false;
+            }, 0);
+          }
+        }
+      }
+    ),
+    [scrollY]
+  );
 
   /**
    * Handle horizontal scroll events

@@ -1,6 +1,16 @@
 import db from '../db/database';
 import { AssetItem } from '../types';
-import { fetchPriceData } from '../api/yahooFinance';
+// import { fetchPriceData } from '../api/yahooFinance';
+
+/**
+ * Fetch ETF summary data from the new API
+ */
+async function fetchEtfSummaryData(symbol: string) {
+  const response = await fetch('https://etf-screener-backend-production.up.railway.app/api/summary');
+  const data = await response.json();
+  // Find the entry for the requested symbol
+  return data.find((item: any) => item.symbol === symbol);
+}
 import { calculateRSI } from '../utils/calculations';
 import { formatReturn, createEmptyAssetItem } from '../utils/data';
 
@@ -32,44 +42,61 @@ export const getAssetData = async (symbol: string): Promise<AssetItem> => {
       }
     }
 
-    // Fetch fresh data from API
-    console.log(`[API] Fetching ${symbol} from API`);
-    const priceData = await fetchPriceData(symbol);
-
-    // Calculate RSI
-    const rsiArray = calculateRSI(priceData.allPrices || []);
-    const rsi = rsiArray.length ? parseFloat(rsiArray[rsiArray.length - 1].toFixed(2)) : 'N/A';
-
-    // Calculate discount from 52-week high
-    const discount = calculateDiscount(priceData.fiftyTwoWeekHigh, priceData.currentPrice);
-
-    // Transform data into AssetItem format
+    // Fetch fresh data from new API
+    console.log(`[API] Fetching ${symbol} from new ETF summary API`);
+    const etfData = await fetchEtfSummaryData(symbol);
+    if (!etfData || !etfData.details) {
+      throw new Error('No data found for symbol: ' + symbol);
+    }
+    const d = etfData.details;
+    // Map API fields to AssetItem
+    const rsi = d.dailyRSI ? parseFloat(d.dailyRSI) : 'N/A';
+    const currentPrice = d.lastClosePrice ? parseFloat(d.lastClosePrice) : null;
+    const discount = d.downFrom2YearHigh ? `${parseFloat(d.downFrom2YearHigh).toFixed(2)}%` : 'N/A';
+    const oneDayReturn = null; // Not provided by API
+    const oneWeekReturn = d["1weekReturns"] ? parseFloat(d["1weekReturns"]) : null;
+    const oneMonthReturn = d["1monthReturns"] ? parseFloat(d["1monthReturns"]) : null;
+    const threeMonthReturn = null; // Not provided by API
+    const sixMonthReturn = null; // Not provided by API
+    const fiftyTwoWeekHigh = d.priceRange?.yearlyRange?.max ? parseFloat(d.priceRange.yearlyRange.max) : null;
+    // For details page, provide price ranges as allPrices (simulate with current only)
+    const allPrices = [
+      { date: d.recordDate || new Date().toISOString(), price: currentPrice ?? 0 }
+    ];
     const transformedData: AssetItem = {
       ticker: symbol,
       rsi,
-      currentPrice: formatPrice(priceData.currentPrice),
-      oneDayReturn: formatReturn(priceData.oneDayReturn),
-      oneWeekReturn: formatReturn(priceData.oneWeekReturn),
-      oneMonthReturn: formatReturn(priceData.oneMonthReturn),
+      currentPrice: formatPrice(currentPrice),
+      oneDayReturn: formatReturn(oneDayReturn),
+      oneWeekReturn: formatReturn(oneWeekReturn),
+      oneMonthReturn: formatReturn(oneMonthReturn),
       discount,
-      fiftyTwoWeekHigh: priceData.fiftyTwoWeekHigh,
+      fiftyTwoWeekHigh,
       rawRsi: rsi === 'N/A' ? null : rsi,
-      rawCurrentPrice: priceData.currentPrice,
-      rawOneDayReturn: priceData.oneDayReturn,
-      rawOneWeekReturn: priceData.oneWeekReturn,
-      rawOneMonthReturn: priceData.oneMonthReturn,
-      rawThreeMonthReturn: priceData.threeMonthReturn,
-      rawSixMonthReturn: priceData.sixMonthReturn,
-      allPrices: formatPriceHistory(priceData.allPrices),
+      rawCurrentPrice: currentPrice,
+      rawOneDayReturn: oneDayReturn,
+      rawOneWeekReturn: oneWeekReturn,
+      rawOneMonthReturn: oneMonthReturn,
+      rawThreeMonthReturn: threeMonthReturn,
+      rawSixMonthReturn: sixMonthReturn,
+      allPrices,
+      // New fields from API
+      recordDate: d.recordDate,
+      lastDayVolume: d.lastDayVolume,
+      weeklyRSI: d.weeklyRSI,
+      monthlyRSI: d.monthlyRSI,
+      oneYearReturn: d["1yearReturns"],
+      twoYearReturn: d["2yearReturns"],
+      twoYearNiftyReturn: d["2yNiftyReturns"],
+      priceToEarning: d.priceToEarning,
+      niftyPriceToEarning: d.niftyPriceToEarning,
     };
-
     // Cache the transformed data
     await db.saveAsset({
       symbol,
       timestamp: now,
       data: JSON.stringify(transformedData)
     });
-
     return transformedData;
   } catch (error) {
     console.error(`[ERROR] Failed to get asset data for ${symbol}:`, error);

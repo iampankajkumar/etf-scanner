@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingHorizontal: sizes.base,
+    paddingHorizontal: 6,
     paddingTop: StatusBar.currentHeight || 0,
   },
   header: {
@@ -24,6 +24,14 @@ export const styles = StyleSheet.create({
     color: colors.text,
   },
   headerContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: 2,
+    borderBottomColor: colors.border,
+    paddingBottom: sizes.base,
+    marginBottom: sizes.base,
+    backgroundColor: colors.background,
+  },
+  appHeaderContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -75,11 +83,15 @@ export const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
+    marginBottom: 60, // Space for banner ad
   },
   fixedHeaderColumn: {
-    width: 100,
     justifyContent: 'center',
-    paddingHorizontal: sizes.base / 2,
+    alignItems: 'center',
+    paddingLeft: 0,
+    paddingRight: 4,
+    zIndex: 10,
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -97,11 +109,12 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   scrollableColumnsContainer: {
-    flex: 15,
+    flex: 1,
   },
   scrollableHeaders: {
     flexDirection: 'row',
     marginLeft: 0,
+    zIndex: 1,
   },
   headerRow: {
     flexDirection: 'row',
@@ -110,18 +123,16 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: sizes.body,
     color: colors.textSecondary,
-    textAlign: 'right',
-    width: 100,
-    paddingHorizontal: sizes.base,
-    paddingVertical: sizes.base,
+    paddingHorizontal: 6,
+    paddingVertical: 8,
   },
   row: {
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    paddingVertical: sizes.base * 1.5,
-    minHeight: 60,
+    paddingVertical: 10,
+    minHeight: 50,
     alignItems: 'center',
   },
   row1: {
@@ -129,17 +140,20 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    paddingVertical: sizes.base * 1.5,
-    minHeight: 60,
+    paddingVertical: 10,
+    minHeight: 50,
     alignItems: 'center',
   },
   fixedColumn: {
     justifyContent: 'center',
-    paddingHorizontal: sizes.base,
+    alignItems: 'center',
+    paddingLeft: 0,
+    paddingRight: 4,
   },
   tickerContainer: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollableColumns: {
     flex: 1,
@@ -151,7 +165,7 @@ export const styles = StyleSheet.create({
     minHeight: 32,
   },
   ticker: {
-    fontSize: sizes.body,
+    fontSize: sizes.caption,
     color: colors.text,
     fontWeight: '600',
   },
@@ -161,9 +175,7 @@ export const styles = StyleSheet.create({
   dataCell: {
     fontSize: sizes.body,
     fontWeight: 'bold',
-    textAlign: 'right',
-    width: 100,
-    paddingHorizontal: sizes.base,
+    paddingHorizontal: 6,
     color: colors.text,
   },
   priceCell: {
@@ -200,6 +212,7 @@ export const styles = StyleSheet.create({
   detailsPage: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingTop: StatusBar.currentHeight || 0,
   },
   detailsHeader: {
     flexDirection: 'row',
@@ -207,9 +220,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: sizes.padding,
     paddingVertical: sizes.base * 2,
+    paddingTop: sizes.base * 3,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     backgroundColor: colors.surface,
+    marginTop: sizes.base,
   },
   backButton: {
     padding: sizes.base,
@@ -237,6 +252,7 @@ export const styles = StyleSheet.create({
   detailsContent: {
     flex: 1,
     backgroundColor: colors.background,
+    marginBottom: 60, // Space for banner ad
   },
   detailsContentContainer: {
     padding: sizes.padding,
@@ -402,5 +418,37 @@ export const styles = StyleSheet.create({
   },
   buttonAddText: {
     color: colors.text,
+  },
+
+  // Banner Ad Styles
+  bannerAdContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 5,
+    zIndex: 100,
+  },
+  bannerAdPlaceholder: {
+    width: '95%',
+    height: 50,
+    backgroundColor: colors.background,
+    borderRadius: sizes.radius,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  bannerAdText: {
+    color: colors.textSecondary,
+    fontSize: sizes.caption,
+    fontStyle: 'italic',
   },
 });
