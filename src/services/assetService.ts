@@ -2,6 +2,7 @@ import db from '../db/database';
 import { AssetItem } from '../types';
 import { fetchPriceData } from '../api/yahooFinance';
 import { calculateRSI } from '../utils/calculations';
+import { formatReturn, createEmptyAssetItem } from '../utils/data';
 
 /**
  * Cache duration in milliseconds (24 hours)
@@ -47,9 +48,9 @@ export const getAssetData = async (symbol: string): Promise<AssetItem> => {
       ticker: symbol,
       rsi,
       currentPrice: formatPrice(priceData.currentPrice),
-      oneDayReturn: formatPercentage(priceData.oneDayReturn),
-      oneWeekReturn: formatPercentage(priceData.oneWeekReturn),
-      oneMonthReturn: formatPercentage(priceData.oneMonthReturn),
+      oneDayReturn: formatReturn(priceData.oneDayReturn),
+      oneWeekReturn: formatReturn(priceData.oneWeekReturn),
+      oneMonthReturn: formatReturn(priceData.oneMonthReturn),
       discount,
       fiftyTwoWeekHigh: priceData.fiftyTwoWeekHigh,
       rawRsi: rsi === 'N/A' ? null : rsi,
@@ -86,16 +87,7 @@ function formatPrice(price: number | null): string {
   return price !== null ? price.toFixed(2) : 'N/A';
 }
 
-/**
- * Format a percentage value to a string with 2 decimal places and % sign
- * @param value The percentage value to format
- * @returns Formatted percentage string or 'N/A' if null
- */
-function formatPercentage(value: number | null): string {
-  if (value === null) return 'N/A';
-  const sign = value > 0 ? '+' : '';
-  return `${sign}${value.toFixed(2)}%`;
-}
+// formatPercentage removed, use formatReturn from utils/data
 
 /**
  * Calculate discount percentage from 52-week high
@@ -155,28 +147,4 @@ function formatPriceHistory(prices: number[] | undefined): { date: string; price
   }));
 }
 
-/**
- * Create an empty asset item for error cases
- * @param symbol The symbol to use for the empty item
- * @returns An empty asset item
- */
-function createEmptyAssetItem(symbol: string): AssetItem {
-  return {
-    ticker: symbol,
-    rsi: 'N/A',
-    currentPrice: 'N/A',
-    oneDayReturn: 'N/A',
-    oneWeekReturn: 'N/A',
-    oneMonthReturn: 'N/A',
-    discount: 'N/A',
-    fiftyTwoWeekHigh: null,
-    rawRsi: null,
-    rawCurrentPrice: null,
-    rawOneDayReturn: null,
-    rawOneWeekReturn: null,
-    rawOneMonthReturn: null,
-    rawThreeMonthReturn: null,
-    rawSixMonthReturn: null,
-    allPrices: [],
-  };
-}
+// createEmptyAssetItem removed, use from utils/data

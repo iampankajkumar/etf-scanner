@@ -13,26 +13,3 @@ export class AppError extends Error {
     return error instanceof AppError;
   }
 }
-
-export const handleError = (error: unknown): AppError => {
-  if (AppError.isAppError(error)) {
-    return error;
-  }
-
-  if (error instanceof Error) {
-    return new AppError(error.message, 'UNKNOWN_ERROR');
-  }
-
-  return new AppError(
-    'An unexpected error occurred',
-    'UNKNOWN_ERROR',
-    'error',
-    { originalError: error }
-  );
-};
-
-export const isNetworkError = (error: unknown): boolean => {
-  return error instanceof Error && 
-    (error.name === 'TypeError' && error.message === 'Failed to fetch' ||
-     error.name === 'AbortError');
-};

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AssetItem, SortConfig } from '../../types';
 import { getAssetData } from '../../services/assetService';
-import { sortData } from '../../utils/data';
+import { sortData, createEmptyAssetItem } from '../../utils/data';
 import { DEFAULT_TICKERS } from '../../constants/tickers';
 
 /**
@@ -26,29 +26,7 @@ const initialState: AssetsState = {
   tickers: DEFAULT_TICKERS,
 };
 
-/**
- * Create an empty asset item for error cases
- * @param symbol The symbol to use for the empty item
- * @returns An empty asset item
- */
-const createEmptyAssetItem = (symbol: string): AssetItem => ({
-  ticker: symbol,
-  rsi: 'N/A',
-  currentPrice: 'N/A',
-  oneDayReturn: 'N/A',
-  oneWeekReturn: 'N/A',
-  oneMonthReturn: 'N/A',
-  discount: 'N/A',
-  fiftyTwoWeekHigh: null,
-  rawRsi: null,
-  rawCurrentPrice: null,
-  rawOneDayReturn: null,
-  rawOneWeekReturn: null,
-  rawOneMonthReturn: null,
-  rawThreeMonthReturn: null,
-  rawSixMonthReturn: null,
-  allPrices: [],
-});
+// createEmptyAssetItem removed, use from utils/data
 
 /**
  * Async thunk for fetching assets data

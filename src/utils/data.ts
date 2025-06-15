@@ -11,8 +11,8 @@ export function formatSymbol(symbol: string): string {
   return formattedSymbol;
 }
 
-export function formatReturn(value: number | null): string {
-  if (value === null || isNaN(value)) {
+export function formatReturn(value: number | null | undefined): string {
+  if (value === null || value === undefined || isNaN(value)) {
     return 'N/A';
   }
   const sign = value > 0 ? '+' : '';
@@ -87,4 +87,25 @@ export function sortData(dataToSort: AssetItem[], key: keyof AssetItem | null, d
       return (aVal as number) > (bVal as number) ? -1 : (aVal as number) < (bVal as number) ? 1 : 0;
     }
   });
+}
+
+export function createEmptyAssetItem(symbol: string): AssetItem {
+  return {
+    ticker: symbol,
+    rsi: 'N/A',
+    currentPrice: 'N/A',
+    oneDayReturn: 'N/A',
+    oneWeekReturn: 'N/A',
+    oneMonthReturn: 'N/A',
+    discount: 'N/A',
+    fiftyTwoWeekHigh: null,
+    rawRsi: null,
+    rawCurrentPrice: null,
+    rawOneDayReturn: null,
+    rawOneWeekReturn: null,
+    rawOneMonthReturn: null,
+    rawThreeMonthReturn: null,
+    rawSixMonthReturn: null,
+    allPrices: [],
+  };
 }

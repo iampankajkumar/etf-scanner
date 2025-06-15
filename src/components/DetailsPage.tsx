@@ -13,6 +13,7 @@ import { calculateVolatility } from '../utils/calculations';
 import { getColor } from '../utils/ui';
 import { PriceRangeBar } from './PriceRangeBar';
 import { AssetItem } from '../types';
+import { formatReturn } from '../utils/data';
 
 interface DetailsPageProps {
   item: AssetItem | null;
@@ -30,10 +31,7 @@ export function DetailsPage({ item, onBack }: DetailsPageProps): React.JSX.Eleme
 
   if (!item) return null;
 
-  const formatReturn = (value: number | null | undefined) => {
-    if (value === null || value === undefined) return 'N/A';
-    return (value > 0 ? '+' : '') + value.toFixed(2) + '%';
-  };
+  // Use shared formatReturn from utils/data
 
   const getDetailColor = (value: number | null | undefined) => {
     if (value === null || value === undefined) return '#888';
