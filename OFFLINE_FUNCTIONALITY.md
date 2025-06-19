@@ -12,8 +12,9 @@ The RSI Tracker app now implements a comprehensive offline-first approach that e
 - App works completely offline after initial data load
 
 ### 2. **Smart Caching System**
-- **Cache Duration**: 24 hours
+- **Cache Duration**: Once per calendar day (not 24-hour intervals)
 - **Storage**: SQLite database for reliable local storage
+- **Cache Logic**: Data refreshes on first app open each day
 - **Cache Keys**: 
   - `all_assets_data`: Stores the complete assets dataset
   - `last_fetch_timestamp`: Tracks when data was last fetched
@@ -65,7 +66,7 @@ The RSI Tracker app now implements a comprehensive offline-first approach that e
 ```
 App Start
     ↓
-Check Cache Validity (< 24 hours?)
+Check Cache Validity (Same Calendar Day?)
     ↓
 [Valid Cache] → Use Cached Data → Display with Cache Indicator
     ↓
@@ -89,7 +90,11 @@ Check Cache Validity (< 24 hours?)
 
 ### Cache Duration
 ```typescript
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// Cache refreshes once per calendar day (not 24-hour intervals)
+// Data from today = valid, data from yesterday = needs refresh
+const isSameDay = now.getFullYear() === lastFetch.getFullYear() &&
+                  now.getMonth() === lastFetch.getMonth() &&
+                  now.getDate() === lastFetch.getDate();
 ```
 
 ### Database Schema

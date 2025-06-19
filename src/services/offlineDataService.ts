@@ -3,9 +3,9 @@ import { AssetItem } from '../types';
 import { isConnected } from '../utils/network';
 
 /**
- * Cache duration in milliseconds (24 hours)
+ * Cache duration - refresh once per calendar day
  */
-const CACHE_DURATION = 24 * 60 * 60 * 1000;
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // Keep for backward compatibility, but we'll use date-based logic
 
 /**
  * Key for storing the last fetch timestamp
@@ -48,7 +48,7 @@ interface ApiResponse {
  */
 export class OfflineDataService {
   /**
-   * Check if cached data is still valid (less than 24 hours old)
+   * Check if cached data is still valid (same calendar day)
    */
   private async isCacheValid(): Promise<boolean> {
     try {
@@ -57,12 +57,23 @@ export class OfflineDataService {
         return false;
       }
       
-      const now = Date.now();
-      const timeSinceLastFetch = now - lastFetchData.timestamp;
+      const now = new Date();
+      const lastFetchDate = new Date(lastFetchData.timestamp);
       
-      console.log(`[CACHE] Last fetch was ${Math.round(timeSinceLastFetch / (1000 * 60 * 60))} hours ago`);
+      // Check if it's the same calendar day
+      const isSameDay = now.getFullYear() === lastFetchDate.getFullYear() &&
+                        now.getMonth() === lastFetchDate.getMonth() &&
+                        now.getDate() === lastFetchDate.getDate();
       
-      return timeSinceLastFetch < CACHE_DURATION;
+      const hoursAgo = Math.round((now.getTime() - lastFetchData.timestamp) / (1000 * 60 * 60));
+      
+      if (isSameDay) {
+        console.log(`[CACHE] Data from today (${hoursAgo} hours ago) - using cache`);
+      } else {
+        console.log(`[CACHE] Data from previous day (${hoursAgo} hours ago) - needs refresh`);
+      }
+      
+      return isSameDay;
     } catch (error) {
       console.error('[CACHE] Error checking cache validity:', error);
       return false;
@@ -200,7 +211,7 @@ export class OfflineDataService {
 
   /**
    * Get assets data with offline-first approach
-   * - First check if cached data is valid (less than 24 hours old)
+   * - First check if cached data is valid (same calendar day)
    * - If valid, return cached data
    * - If not valid or no cache, fetch from API and cache the result
    * - If API fails and we have cached data, return cached data with a warning
@@ -325,12 +336,18 @@ export class OfflineDataService {
 
       const lastFetch = new Date(lastFetchData.timestamp);
       const cacheAge = Date.now() - lastFetchData.timestamp;
-      const isValid = cacheAge < CACHE_DURATION;
+      
+      // Check if cache is from today (same calendar day)
+      const now = new Date();
+      const isSameDay = now.getFullYear() === lastFetch.getFullYear() &&
+                        now.getMonth() === lastFetch.getMonth() &&
+                        now.getDate() === lastFetch.getDate();
+      
       const itemCount = cachedAssetsData ? JSON.parse(cachedAssetsData.data).length : 0;
 
       return {
         hasCache: true,
-        isValid,
+        isValid: isSameDay,
         lastFetch,
         cacheAge: Math.round(cacheAge / (1000 * 60 * 60)),
         itemCount
