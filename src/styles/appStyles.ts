@@ -81,6 +81,20 @@ export const styles = StyleSheet.create({
     fontSize: sizes.body,
     textAlign: 'center',
   },
+  cacheStatusContainer: {
+    backgroundColor: '#2E7D32',
+    padding: sizes.base,
+    marginBottom: sizes.base,
+    borderRadius: sizes.radius,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
+  },
+  cacheStatusText: {
+    color: colors.text,
+    fontSize: sizes.caption,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
   contentContainer: {
     flex: 1,
     marginBottom: 60, // Space for banner ad

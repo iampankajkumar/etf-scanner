@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store';
-import { fetchAssets, sortAssets } from '../store/slices/assetsSlice';
+import { fetchAssets, refreshAssets, sortAssets } from '../store/slices/assetsSlice';
 import { AssetItem, SortConfig } from '../types';
 
 /**
@@ -10,11 +10,19 @@ import { AssetItem, SortConfig } from '../types';
  */
 export const useRSI = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { items: data, status, error, sortConfig } = useSelector((state: RootState) => state.assets);
+  const { 
+    items: data, 
+    status, 
+    error, 
+    sortConfig, 
+    fromCache, 
+    cacheAge, 
+    lastUpdated 
+  } = useSelector((state: RootState) => state.assets);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   /**
-   * Load RSI data for all tickers
+   * Load RSI data for all tickers (uses cache if available and valid)
    */
   const handleLoadRSI = useCallback(async () => {
     try {
@@ -22,6 +30,20 @@ export const useRSI = () => {
       await dispatch(fetchAssets()).unwrap();
     } catch (error) {
       console.error('Failed to load RSI data:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [dispatch]);
+
+  /**
+   * Force refresh data from API (bypasses cache)
+   */
+  const handleRefreshRSI = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      await dispatch(refreshAssets()).unwrap();
+    } catch (error) {
+      console.error('Failed to refresh RSI data:', error);
     } finally {
       setIsRefreshing(false);
     }
@@ -52,7 +74,11 @@ export const useRSI = () => {
     error,
     isRefreshing,
     sortConfig,
+    fromCache,
+    cacheAge,
+    lastUpdated,
     loadRSI: handleLoadRSI,
+    refreshRSI: handleRefreshRSI,
     handleSort,
   };
 };

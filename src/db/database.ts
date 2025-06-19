@@ -127,6 +127,25 @@ class DatabaseService {
   }
 
   /**
+   * Get all assets from the database
+   * @returns Promise that resolves to all cached assets
+   */
+  async getAllAssets(): Promise<CachedAsset[]> {
+    try {
+      await this.ensureInitialized();
+      
+      const result = await this.db.getAllAsync<CachedAsset>(
+        'SELECT id, symbol, timestamp, data FROM assets ORDER BY symbol'
+      );
+      
+      return result || [];
+    } catch (error) {
+      console.error('Error getting all assets:', error);
+      return [];
+    }
+  }
+
+  /**
    * Ensure the database is initialized before performing operations
    */
   private async ensureInitialized(): Promise<void> {

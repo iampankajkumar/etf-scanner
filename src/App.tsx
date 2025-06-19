@@ -46,7 +46,11 @@ export default function App(): React.JSX.Element {
     error,
     isRefreshing,
     sortConfig,
+    fromCache,
+    cacheAge,
+    lastUpdated,
     loadRSI,
+    refreshRSI,
     handleSort,
   } = useRSI();
 
@@ -140,20 +144,33 @@ export default function App(): React.JSX.Element {
           onDismiss={() => setMenuVisible(false)}
           items={[
             {
+              title: 'Refresh Data',
+              onPress: () => {
+                setMenuVisible(false);
+                refreshRSI();
+              },
+            },
+            {
+              title: 'Cache Status',
+              onPress: () => {
+                setMenuVisible(false);
+                const cacheInfo = fromCache 
+                  ? `Using cached data from ${cacheAge} hours ago`
+                  : 'Using fresh data from API';
+                Alert.alert('Cache Status', cacheInfo);
+              },
+            },
+            {
               title: 'Settings',
               onPress: () => Alert.alert('Settings', 'Settings page coming soon!'),
             },
             {
-              title: 'Dark Mode',
-              onPress: () => Alert.alert('Dark Mode', 'Theme settings coming soon!'),
-            },
-            {
               title: 'About',
-              onPress: () => Alert.alert('About', 'RSI Tracker v1.0.0\nBuilt with ❤️ using React Native'),
+              onPress: () => Alert.alert('About', 'RSI Tracker v1.0.0\nBuilt with ❤️ using React Native\n\n📱 Offline-first design - Data cached for 24 hours'),
             },
             {
               title: 'Help',
-              onPress: () => Alert.alert('Help', 'Help center coming soon!'),
+              onPress: () => Alert.alert('Help', 'Pull down to refresh data\nData is cached for 24 hours for offline use\nCheck Cache Status for more info'),
             },
           ]}
         />
@@ -162,6 +179,15 @@ export default function App(): React.JSX.Element {
         {error && (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
+
+        {/* Cache status indicator */}
+        {fromCache && cacheAge !== undefined && (
+          <View style={styles.cacheStatusContainer}>
+            <Text style={styles.cacheStatusText}>
+              📱 Offline mode - Data from {cacheAge} hours ago
+            </Text>
           </View>
         )}
 
@@ -197,7 +223,7 @@ export default function App(): React.JSX.Element {
                 refreshControl={
                   <RefreshControl 
                     refreshing={isRefreshing} 
-                    onRefresh={loadRSI} 
+                    onRefresh={refreshRSI} 
                     colors={['#4CAF50']}
                     tintColor="#4CAF50"
                   />
