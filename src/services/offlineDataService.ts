@@ -4,6 +4,7 @@ import { isConnected } from '../utils/network';
 
 /**
  * Cache duration - refresh once per calendar day
+ * /api/summary should only be called once per calendar day
  */
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // Keep for backward compatibility, but we'll use date-based logic
 
@@ -80,6 +81,7 @@ export class OfflineDataService {
     }
   }
 
+  
   /**
    * Get cached assets data
    */
@@ -131,10 +133,10 @@ export class OfflineDataService {
   }
 
   /**
-   * Fetch fresh data from the API
+   * Fetch fresh data from /api/summary (called only once per calendar day)
    */
   private async fetchFromApi(): Promise<AssetItem[]> {
-    console.log('[API] Fetching fresh data from API...');
+    console.log('[SUMMARY_API] Fetching fresh data from /api/summary...');
     
     const response = await fetch('https://etf-screener-backend-production.up.railway.app/api/summary');
     
@@ -205,15 +207,16 @@ export class OfflineDataService {
       } as AssetItem;
     });
 
-    console.log(`[API] Successfully fetched ${assets.length} assets from API`);
+    console.log(`[SUMMARY_API] Successfully fetched ${assets.length} assets from /api/summary`);
     return assets;
   }
 
   /**
    * Get assets data with offline-first approach
+   * /api/summary is called only once per calendar day and cached in SQLite
    * - First check if cached data is valid (same calendar day)
-   * - If valid, return cached data
-   * - If not valid or no cache, fetch from API and cache the result
+   * - If valid, ALWAYS return cached data (even for force refresh)
+   * - If not valid or no cache, fetch from /api/summary and cache the result
    * - If API fails and we have cached data, return cached data with a warning
    */
   async getAssets(forceRefresh: boolean = false): Promise<{
@@ -226,24 +229,27 @@ export class OfflineDataService {
       // Initialize database if not already done
       await db.init();
 
-      // Check if we should use cached data
-      if (!forceRefresh) {
-        const isCacheValid = await this.isCacheValid();
-        
-        if (isCacheValid) {
-          const cachedAssets = await this.getCachedAssets();
-          if (cachedAssets) {
-            const lastFetchData = await db.getAsset(LAST_FETCH_KEY);
-            const cacheAge = lastFetchData ? Date.now() - lastFetchData.timestamp : 0;
-            
-            return {
-              data: cachedAssets,
-              fromCache: true,
-              cacheAge: Math.round(cacheAge / (1000 * 60 * 60)) // hours
-            };
-          }
+      // Check if we have valid cached data (same calendar day)
+      const isCacheValid = await this.isCacheValid();
+      
+      if (isCacheValid) {
+        const cachedAssets = await this.getCachedAssets();
+        if (cachedAssets) {
+          const lastFetchData = await db.getAsset(LAST_FETCH_KEY);
+          const cacheAge = lastFetchData ? Date.now() - lastFetchData.timestamp : 0;
+          
+          console.log('[SUMMARY_API] Using cached data from today - /api/summary not called');
+          return {
+            data: cachedAssets,
+            fromCache: true,
+            cacheAge: Math.round(cacheAge / (1000 * 60 * 60)) // hours
+          };
         }
       }
+
+      // Cache is not valid (different day) or no cache exists
+      // Need to call /api/summary to get fresh data
+      console.log('[SUMMARY_API] Cache invalid or missing - calling /api/summary');
 
       // Check network connectivity before attempting API call
       const hasConnection = await isConnected();
@@ -266,17 +272,18 @@ export class OfflineDataService {
         }
       }
 
-      // Try to fetch fresh data from API
+      // Try to fetch fresh data from /api/summary
       try {
         const freshAssets = await this.fetchFromApi();
         await this.saveAssetsToCache(freshAssets);
         
+        console.log('[SUMMARY_API] Successfully fetched and cached data from /api/summary');
         return {
           data: freshAssets,
           fromCache: false
         };
       } catch (apiError) {
-        console.error('[API] Failed to fetch from API:', apiError);
+        console.error('[API] Failed to fetch from /api/summary:', apiError);
         
         // If API fails, try to return cached data even if it's old
         const cachedAssets = await this.getCachedAssets();
@@ -284,7 +291,7 @@ export class OfflineDataService {
           const lastFetchData = await db.getAsset(LAST_FETCH_KEY);
           const cacheAge = lastFetchData ? Date.now() - lastFetchData.timestamp : 0;
           
-          console.log('[FALLBACK] Using cached data due to API failure');
+          console.log('[FALLBACK] Using cached data due to /api/summary failure');
           return {
             data: cachedAssets,
             fromCache: true,

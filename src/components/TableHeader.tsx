@@ -24,7 +24,7 @@ export function TableHeader({ sortConfig, onSort, scrollX }: TableHeaderProps): 
       <View style={[styles.fixedHeaderColumn, { width: COLUMN_WIDTHS.TICKER, borderRightWidth: 1, borderRightColor: '#333' }]}> 
         <TouchableOpacity onPress={() => onSort('ticker')}>
           <Text 
-            style={[styles.headerCell, { width: COLUMN_WIDTHS.TICKER, borderRightWidth: 1, borderRightColor: '#333', textAlign: 'left', paddingLeft: 2, paddingRight: 4 }]}
+            style={[styles.headerCell, { width: COLUMN_WIDTHS.TICKER, borderRightWidth: 1, borderRightColor: '#333', textAlign: 'left',  paddingRight: 4 }]}
             numberOfLines={1}
             adjustsFontSizeToFit={true}
             minimumFontScale={0.7}
@@ -42,6 +42,12 @@ export function TableHeader({ sortConfig, onSort, scrollX }: TableHeaderProps): 
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onSort('currentPrice')}>
             <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.PRICE_CELL, borderRightWidth: 1, borderRightColor: '#333', textAlign: 'center' }]}>Price {getSortIndicator('currentPrice')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onSort('livePrice')}>
+            <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.LIVE_PRICE_CELL, borderRightWidth: 1, borderRightColor: '#333', textAlign: 'center' }]}>Live Price {getSortIndicator('livePrice')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onSort('changePercent')}>
+            <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.CHANGE_PERCENT_CELL, borderRightWidth: 1, borderRightColor: '#333', textAlign: 'center' }]}>Change% {getSortIndicator('changePercent')}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onSort('rsi')}>
             <Text style={[styles.headerCell, { width: COLUMN_WIDTHS.DATA_CELL, borderRightWidth: 1, borderRightColor: '#333', textAlign: 'center' }]}>RSI (D) {getSortIndicator('rsi')}</Text>

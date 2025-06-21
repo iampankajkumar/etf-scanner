@@ -50,6 +50,14 @@ export function sortData(dataToSort: AssetItem[], key: keyof AssetItem | null, d
         aVal = a.rawCurrentPrice;
         bVal = b.rawCurrentPrice;
         break;
+      case 'livePrice':
+        aVal = a.rawLivePrice;
+        bVal = b.rawLivePrice;
+        break;
+      case 'changePercent':
+        aVal = a.rawChangePercent;
+        bVal = b.rawChangePercent;
+        break;
       case 'rsi':
         aVal = a.rawRsi;
         bVal = b.rawRsi;

@@ -1,1 +1,1 @@
-export * from './assetService';
+export * from './livePriceService';

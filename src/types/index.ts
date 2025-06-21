@@ -16,6 +16,12 @@ export interface AssetItem {
   rawSixMonthReturn: number | null;
   allPrices: { date: string; price: number }[];
 
+  // Live price data (not cached, fetched separately)
+  livePrice?: string;
+  changePercent?: string;
+  rawLivePrice?: number | null;
+  rawChangePercent?: number | null;
+
   // All fields from API
   recordDate?: string;
   lastClosePrice?: string;

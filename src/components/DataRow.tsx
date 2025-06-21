@@ -53,7 +53,8 @@ const DataRow = React.memo<DataRowProps>(({ item, onDelete, onSymbolPress, fixed
     oneDayReturn: getReturnColor(item.oneDayReturn),
     oneWeekReturn: getReturnColor(item.oneWeekReturn),
     oneMonthReturn: getReturnColor(item.oneMonthReturn),
-  }), [item.discount, item.rsi, item.weeklyRSI, item.monthlyRSI, item.oneDayReturn, item.oneWeekReturn, item.oneMonthReturn]);
+    changePercent: getReturnColor(item.changePercent),
+  }), [item.discount, item.rsi, item.weeklyRSI, item.monthlyRSI, item.oneDayReturn, item.oneWeekReturn, item.oneMonthReturn, item.changePercent]);
 
   // Static style objects (created once)
   const staticStyles = useMemo(() => ({
@@ -65,6 +66,18 @@ const DataRow = React.memo<DataRowProps>(({ item, onDelete, onSymbolPress, fixed
     }],
     priceCell: [styles.dataCell, styles.priceCell, { 
       width: COLUMN_WIDTHS.PRICE_CELL, 
+      borderRightWidth: 1, 
+      borderRightColor: '#333', 
+      textAlign: 'center' as const 
+    }],
+    livePriceCell: [styles.dataCell, styles.priceCell, { 
+      width: COLUMN_WIDTHS.LIVE_PRICE_CELL, 
+      borderRightWidth: 1, 
+      borderRightColor: '#333', 
+      textAlign: 'center' as const 
+    }],
+    changePercentCell: [styles.dataCell, { 
+      width: COLUMN_WIDTHS.CHANGE_PERCENT_CELL, 
       borderRightWidth: 1, 
       borderRightColor: '#333', 
       textAlign: 'center' as const 
@@ -110,6 +123,8 @@ const DataRow = React.memo<DataRowProps>(({ item, onDelete, onSymbolPress, fixed
         <View style={styles.scrollableColumns}>
           <Text style={[staticStyles.dataCell, { color: colors.discount }]}>{String(item.discount || '0.00%')}</Text>
           <Text style={staticStyles.priceCell}>{String(item.currentPrice || 'N/A')}</Text>
+          <Text style={staticStyles.livePriceCell}>{String(item.livePrice || 'N/A')}</Text>
+          <Text style={[staticStyles.changePercentCell, { color: colors.changePercent }]}>{String(item.changePercent || 'N/A')}</Text>
           <Text style={[staticStyles.dataCell, { color: colors.rsi }]}>{String(item.rsi || 'N/A')}</Text>
           <Text style={[staticStyles.dataCell, { color: colors.weeklyRSI }]}>{String(item.weeklyRSI || 'N/A')}</Text>
           <Text style={[staticStyles.dataCell, { color: colors.monthlyRSI }]}>{String(item.monthlyRSI || 'N/A')}</Text>

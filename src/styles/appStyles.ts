@@ -10,7 +10,6 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingHorizontal: 6,
     paddingTop: StatusBar.currentHeight || 0,
   },
   header: {
@@ -27,7 +26,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 2,
     borderBottomColor: colors.border,
-    paddingBottom: sizes.base,
     marginBottom: sizes.base,
     backgroundColor: colors.background,
   },
@@ -97,13 +95,12 @@ export const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    marginBottom: 60, // Space for banner ad
+    marginBottom: 60, // Space for banner ad,
   },
   fixedHeaderColumn: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingLeft: 0,
-    paddingRight: 4,
     zIndex: 10,
     backgroundColor: colors.background,
   },
@@ -123,12 +120,13 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   scrollableColumnsContainer: {
-    flex: 1,
+    flex:2.5
   },
   scrollableHeaders: {
     flexDirection: 'row',
     marginLeft: 0,
     zIndex: 1,
+    paddingHorizontal: sizes.base,
   },
   headerRow: {
     flexDirection: 'row',
@@ -137,7 +135,7 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: sizes.body,
     color: colors.textSecondary,
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingVertical: 8,
   },
   row: {
@@ -182,6 +180,7 @@ export const styles = StyleSheet.create({
     fontSize: sizes.caption,
     color: colors.text,
     fontWeight: '600',
+    marginLeft: 16,
   },
   clickableTicker: {
     textDecorationLine: 'underline',

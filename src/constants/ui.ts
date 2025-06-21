@@ -8,10 +8,12 @@
  * Table column widths
  */
 export const COLUMN_WIDTHS = {
-  TICKER: 90,
+  TICKER: 95,
   DATA_CELL: 75,
   VOLUME_CELL: 90,
   PRICE_CELL: 80,
+  LIVE_PRICE_CELL: 85,
+  CHANGE_PERCENT_CELL: 80,
 };
 
 /**
